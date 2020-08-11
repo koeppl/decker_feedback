@@ -22,5 +22,5 @@ daemon: build kill
 
 kill:
 	if [ -f $(pidfile) ]; then \
-		kill `cat $(pidfile)` && rm -f decker-engine.lock decker-engine.pid; \
+		kill `cat $(pidfile)` && rm -f $(lockfile) $(pidfile); \
 	fi
