@@ -41,7 +41,8 @@ type PostComment
    = "comments" :> Capture "deck" Text :> Capture "slide" Text :> Capture "author" Text :> ReqBody '[ JSON] Text :> Post '[ JSON] CommentId
 
 type DeleteComment
-  = "comments" :> Capture "id" (Key Comment) :> Delete '[JSON] ()
+   = "comments" :> Capture "id" (Key Comment) :> Delete '[ JSON] ()
+
 type CommentAPI
    = GetAllComments :<|> GetComments1 :<|> GetComments2 :<|> GetComments3 :<|> PostComment :<|> DeleteComment
 
@@ -52,7 +53,8 @@ commentServer :: Server CommentAPI
 commentServer =
   getAllComments :<|> getByDeckComments :<|> getBySlideComments :<|>
   getBySlideAuthorComments :<|>
-  postComment :<|> deleteComment
+  postComment :<|>
+  deleteComment
 
 type AuthorAPI = GetAllAuthors :<|> GetAuthor
 
@@ -132,8 +134,15 @@ postComment did sid token markdown =
   liftIO $ do
     now <- getCurrentTime
     runSqlite "db/engine.db" $ do
-      author <- fmap entityKey <$> selectFirst [PersonToken ==. token] []
-      insert $ Comment markdown did sid author now
+      if Text.null token
+        then insert $ Comment markdown did sid Nothing now
+        else do
+          maybeKey <- fmap entityKey <$> selectFirst [PersonToken ==. token] []
+          case maybeKey of
+            Just key -> insert $ Comment markdown did sid maybeKey now
+            Nothing -> do
+              key <- insert $ Person token
+              insert $ Comment markdown did sid (Just key) now
 
 deleteComment :: Key Comment -> Handler ()
 deleteComment key = liftIO $ runSqlite "db/engine.db" $ do delete key
