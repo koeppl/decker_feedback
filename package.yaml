@@ -51,7 +51,7 @@ library:
   source-dirs: src
 
 executables:
-  decker-engine-exe:
+  decker-engine:
     main: Main
     source-dirs: app
     ghc-options:
