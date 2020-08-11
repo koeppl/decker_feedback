@@ -49,23 +49,50 @@
       <h1>Q API Tester</h1>
     </header>
 
+    <p>
+      Test 1,2,3. This page tests the deck facing API of the Decker Engine.
+    </p>
+
     <h2>Context</h2>
+
+    <p>
+      Comments can be selected by <i>deck ID</i> and <i>slide ID</i>. During
+      normal operation both identifiers will be determined from the deck source
+      and should be calculated such that the tuple (<i>deck ID</i>,
+      <i>slide ID</i>) uniquely identifies a slide (For a suitable definition of
+      <i>uniquely</i>).
+    </p>
+    <p>
+      All matching questions are displayed, regardless of author. Questions that
+      match the current author are rendered with a delete button.
+    </p>
+    <p>Inputs are not yet validated aggressively. Tread lightly.</p>
 
     <label for="deckid">Deck ID</label> <i class="example">(cgg)</i>
     <input type="text" name="deckid" value="cgg" id="deckid" />
     <label for="slideid">Slide ID</label>
     <i class="example">(intro-slide, slide-2)</i>
     <input type="text" name="slideid" value="intro-slide" id="slideid" />
-    <label for="persontoken">Person Token</label>
+    <label for="persontoken">Author Token</label>
     <i class="example">(person1, person2)</i>
     <input type="text" name="persontoken" value="person1" id="persontoken" />
     <button id="update-button">Update (⏎)</button>
 
     <h2>Qs on slide</h2>
 
+    <p>
+      Questions that match the current combination of <i>deck ID</i> and
+      <i>slide ID</i>.
+    </p>
+
     <div id="comment-list-1"></div>
 
     <h2>Add Q</h2>
+
+    <p>
+      Add a question to the selected slide. If the author field is empty the
+      question is added anonymously.
+    </p>
 
     <label for="add-comment-1">What the fuck?</label>
     <textarea id="add-comment-1" rows="4" cols="40"></textarea>

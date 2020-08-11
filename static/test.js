@@ -6,16 +6,17 @@ window.addEventListener("load", e => {
   let token = document.getElementById("persontoken");
   let update = document.getElementById("update-button");
   let textarea = document.getElementById("add-comment-1");
+  let submit = document.getElementById("submit-button");
 
-  deckid.addEventListener("keyup", e => {
+  deckid.addEventListener("keydown", e => {
     if (e.key === "Enter") updateCommentList();
   });
 
-  slideid.addEventListener("keyup", e => {
+  slideid.addEventListener("keydown", e => {
     if (e.key === "Enter") updateCommentList();
   });
 
-  token.addEventListener("keyup", e => {
+  token.addEventListener("keydown", e => {
     if (e.key === "Enter") updateCommentList();
   });
 
@@ -23,14 +24,13 @@ window.addEventListener("load", e => {
     updateCommentList();
   });
 
-  textarea.addEventListener("keyup", e => {
+  textarea.addEventListener("keydown", e => {
     if (e.key === "Enter" && e.shiftKey) {
       submitComment();
       updateCommentList();
     }
   });
 
-  let submit = document.getElementById("submit-button");
   submit.addEventListener("click", e => {
     submitComment();
     updateCommentList();
@@ -68,6 +68,7 @@ function updateCommentList() {
   let deckid = document.getElementById("deckid").value;
   let slideid = document.getElementById("slideid").value;
   let token = document.getElementById("persontoken").value;
+  let submit = document.getElementById("submit-button");
 
   let container = document.getElementById("comment-list-1");
 

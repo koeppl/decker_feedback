@@ -134,6 +134,7 @@ postComment did sid token markdown =
   liftIO $ do
     now <- getCurrentTime
     runSqlite "db/engine.db" $ do
+      when (Text.null did || Text.null sid) $ fail "Fucking idiot."
       if Text.null token
         then insert $ Comment markdown did sid Nothing now
         else do
