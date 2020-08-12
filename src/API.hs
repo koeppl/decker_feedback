@@ -79,15 +79,15 @@ docsBS = encodeUtf8 . toText . markdown $ docsWithIntros [intro] deckerAPI
 serveDocs _ respond =
   respond $ responseLBS ok200 [("Content-Type", "text/plain")] docsBS
 
-type DeckerAPI = CommentAPI :<|> AuthorAPI :<|> "static" :> Raw :<|> Raw
+type DeckerAPI = CommentAPI :<|> AuthorAPI :<|> Raw :<|> Raw
 
 deckerAPI :: Proxy DeckerAPI
 deckerAPI = Proxy
 
 deckerServer :: Server DeckerAPI
 deckerServer =
-  commentServer :<|> authorServer :<|> serveDirectoryWebApp "static" :<|>
-  Tagged serveDocs
+  commentServer :<|> authorServer :<|> Tagged serveDocs :<|>
+  serveDirectoryWebApp "public"
 
 getAllComments :: Handler [Comment]
 getAllComments =
