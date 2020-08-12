@@ -4,5 +4,5 @@
 /decker-engine.pid
 /decker-engine.lock
 /static/decker.js
-/public/support
 /.decker
+/public

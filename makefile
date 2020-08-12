@@ -6,14 +6,17 @@ lockfile := decker-engine.lock
 
 build:
 	stack build
+	decker html
+
+run: build
+	stack run -- decker-engine
 
 install:
 	stack install
 	systemctl --user restart decker-engine
 
 open: build
-	open -a safari http://localhost:8081/static/index.html
-	sleep 1
+	(sleep 2; open -a firefox http://localhost:8081/api-test.html)&
 	stack run -- decker-engine
 
 install-service: build

@@ -26,10 +26,11 @@ main :: IO ()
 main = do
   baseUrl <- toText . fromMaybe "" <$> lookupEnv "DECKER_BASE_URL"
   putStrLn "# decker-engine"
-  Text.writeFile "static/decker.js" $
+  Text.writeFile "api/decker.js" $
     jsForAPI
       jsAPI
       (vanillaJSWith defCommonGeneratorOptions {urlPrefix = baseUrl})
+  saveDocs "api/docs-page.md"
   runSqlite "db/engine.db" $ do runMigration migrateAll
   run 8081 app
 

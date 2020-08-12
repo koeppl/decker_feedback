@@ -14,6 +14,7 @@ import Control.Monad.Logger
 import Data.Maybe
 import Data.Proxy
 import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
 import Data.Time (UTCTime)
 import Data.Time.Clock
 import Database.Persist.Sqlite
@@ -73,20 +74,21 @@ type JsAPI = CommentAPI :<|> AuthorAPI
 jsAPI :: Proxy JsAPI
 jsAPI = Proxy
 
-docsBS :: LByteString
-docsBS = encodeUtf8 . toText . markdown $ docsWithIntros [intro] deckerAPI
+docs :: Text
+docs = toText . markdown $ docsWithIntros [intro] deckerAPI
 
-serveDocs _ respond =
-  respond $ responseLBS ok200 [("Content-Type", "text/plain")] docsBS
+saveDocs :: FilePath -> IO ()
+saveDocs path = Text.writeFile path API.docs
 
-type DeckerAPI = CommentAPI :<|> AuthorAPI :<|> Raw :<|> Raw
+type DeckerAPI
+   = CommentAPI :<|> AuthorAPI :<|> "api" :> Raw :<|> "public" :> Raw
 
 deckerAPI :: Proxy DeckerAPI
 deckerAPI = Proxy
 
 deckerServer :: Server DeckerAPI
 deckerServer =
-  commentServer :<|> authorServer :<|> Tagged serveDocs :<|>
+  commentServer :<|> authorServer :<|> serveDirectoryWebApp "api" :<|>
   serveDirectoryWebApp "public"
 
 getAllComments :: Handler [Comment]
