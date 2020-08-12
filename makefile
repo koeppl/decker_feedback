@@ -13,6 +13,8 @@ open: build
 	stack run -- decker-engine
 
 install-service: build
+	sudo mkdir -p /var/local/decker/db
+	sudo mkdir -p /var/local/decker/static
 	sudo cp decker-engine.service /etc/systemd/system/
 	sudo chmod 644 /etc/systemd/system/decker-engine.service
 	sudo systemctl daemon-reload

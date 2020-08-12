@@ -5,7 +5,11 @@ Description=Decker Engine.
 Type=forking
 Restart=always
 RestartSec=3
-ExecStart=/usr/sbin/daemonize -c /home/henrik/workspace/decker-engine -p /home/henrik/workspace/decker-engine/decker-engine.pid /home/henrik/.local/bin/decker-engine 
+Environment="DECKER_BASE_URL=/decker"
+ExecStart=/usr/sbin/daemonize \
+  -c /var/local/decker \
+  -p /var/local/decker/decker-engine.pid \
+  /home/henrik/.local/bin/decker-engine 
 
 [Install]
 WantedBy=multi-user.target
