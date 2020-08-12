@@ -1,3 +1,6 @@
 .DS_Store
 /.stack-work/
 /db/
+/decker-engine.pid
+/decker-engine.lock
+/static/decker.js

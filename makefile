@@ -7,17 +7,31 @@ lockfile := decker-engine.lock
 build:
 	stack build
 
+install:
+	stack install
+	systemctl --user restart decker-engine
+
 open: build
 	open -a safari http://localhost:8081/static/index.html
 	sleep 1
 	stack run -- decker-engine
 
 install-service: build
-	sudo mkdir -p /var/local/decker/db
-	sudo mkdir -p /var/local/decker/static
-	sudo cp decker-engine.service /etc/systemd/system/
-	sudo chmod 644 /etc/systemd/system/decker-engine.service
-	sudo systemctl daemon-reload
+	mkdir -p /home/henrik/.config/systemd/user
+	cp decker-engine.service /home/henrik/.config/systemd/user
+	systemctl --user daemon-reload
+
+start: install-service
+	systemctl --user start decker-engine
+
+stop: install-service
+	systemctl --user stop decker-engine
+
+status: install-service
+	systemctl --user status decker-engine
+
+restart: install-service
+	systemctl --user restart decker-engine
 
 daemon: build kill
 	daemonize -c $(directory) -p $(pidfile) -l $(lockfile) $(decker-engine)
