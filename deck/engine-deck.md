@@ -20,4 +20,4 @@ deck-id: decker-engine-test
 
 ## API Doc
 
--   [api/docs-page.html](/public/api/docs-page.html)
+-   [api/docs-page.html](/decks/api/docs-page.html)
