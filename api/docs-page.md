@@ -128,6 +128,32 @@ Enjoy!
 []
 ```
 
+## POST /comments/:deck/:slide
+
+### Captures:
+
+- *deck*: String id of the deck
+- *slide*: String id of the slide inside a deck
+
+### Request:
+
+- Supported content types are:
+
+    - `application/json;charset=utf-8`
+    - `application/json`
+
+### Response:
+
+- Status code 200
+- Headers: []
+
+- Supported content types are:
+
+    - `application/json;charset=utf-8`
+    - `application/json`
+
+- No response body
+
 ## GET /comments/:deck/:slide/:author
 
 ### Captures:

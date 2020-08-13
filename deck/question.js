@@ -11,9 +11,12 @@ Reveal.addEventListener("ready", event => {
   let input = document.createElement("div");
   let text = document.createElement("textarea");
   let footer = document.createElement("div");
+  let deckid = document.createElement("input");
+  let slideid = document.createElement("input");
 
   panel.classList.add("q-panel");
   header.classList.add("q-header");
+  user.setAttribute("placeholder", "Enter user token (try person1 or person2)");
   header.appendChild(user);
   header.appendChild(close);
   close.classList.add("q-close");
@@ -26,7 +29,12 @@ Reveal.addEventListener("ready", event => {
   text.setAttribute("rows", 4);
 
   footer.classList.add("q-footer");
-  footer.textContent = "Footer";
+  footer.appendChild(deckid);
+  deckid.setAttribute("placeholder", "Deck ID");
+  deckid.setAttribute("disabled", true);
+  footer.appendChild(slideid);
+  slideid.setAttribute("placeholder", "Slide ID");
+  slideid.setAttribute("disabled", true);
 
   panel.appendChild(header);
   panel.appendChild(list);
@@ -37,16 +45,24 @@ Reveal.addEventListener("ready", event => {
 
   let getContext = () => {
     return {
-      deckid: body.getAttribute("data-deckid"),
-      slideid: Reveal.getCurrentSlide().id,
+      deck: body.getAttribute("data-deckid"),
+      slide: Reveal.getCurrentSlide().id,
       token: user.value
     };
+  };
+
+  let updateIds = () => {
+    let context = getContext();
+    deckid.value = context.deck;
+    slideid.value = context.slide;
   };
 
   user.addEventListener("keydown", e => {
     if (e.key === "Enter") {
       updateCommentList(getContext, list);
+      updateIds();
       e.stopPropagation();
+      document.activeElement.blur();
     }
   });
 
@@ -55,6 +71,17 @@ Reveal.addEventListener("ready", event => {
       submitComment(getContext, list, e.target);
       e.stopPropagation();
       e.preventDefault();
+      document.activeElement.blur();
     }
+  });
+
+  updateCommentList(getContext, list);
+  updateIds();
+
+  Reveal.addEventListener("slidechanged", event => {
+    console.log(getContext());
+    console.log(event.currentSlide.id);
+    updateCommentList(getContext, list);
+    updateIds();
   });
 });

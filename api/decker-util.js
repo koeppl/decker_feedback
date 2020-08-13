@@ -1,27 +1,38 @@
 function submitComment(getContext, container, textarea) {
   let context = getContext();
-  console.log("submit");
-  console.log(context);
-  console.log(textarea);
 
   if (!textarea.value) {
     return;
   }
 
-
-  postCommentsByDeckBySlideByAuthor(
-    context.deck,
-    context.slide,
-    context.token,
-    textarea.value,
-    _ => {
-      textarea.value = "";
-      updateCommentList(getContext, container);
-    },
-    err => {
-      console.log(err);
-    }
-  );
+  if (context.token) {
+    postCommentsByDeckBySlideByAuthor(
+      context.deck,
+      context.slide,
+      context.token,
+      textarea.value,
+      _ => {
+        textarea.value = "";
+        updateCommentList(getContext, container);
+      },
+      err => {
+        console.log(err);
+      }
+    );
+  } else {
+    postCommentsByDeckBySlide(
+      context.deck,
+      context.slide,
+      textarea.value,
+      _ => {
+        textarea.value = "";
+        updateCommentList(getContext, container);
+      },
+      err => {
+        console.log(err);
+      }
+    );
+  }
 }
 
 function updateCommentList(getContext, container) {
@@ -76,4 +87,3 @@ function fillContainer(getContext, container, list) {
   }
   container.scrollTop = 0;
 }
-

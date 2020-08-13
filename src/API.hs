@@ -38,6 +38,9 @@ type GetComments2
 type GetComments3
    = "comments" :> Capture "deck" Text :> Capture "slide" Text :> Capture "author" Text :> Get '[ JSON] [Comment]
 
+type PostAnonymousComment
+   = "comments" :> Capture "deck" Text :> Capture "slide" Text :> ReqBody '[ JSON] Text :> Post '[ JSON] CommentId
+
 type PostComment
    = "comments" :> Capture "deck" Text :> Capture "slide" Text :> Capture "author" Text :> ReqBody '[ JSON] Text :> Post '[ JSON] CommentId
 
@@ -45,7 +48,7 @@ type DeleteComment
    = "comments" :> Capture "id" (Key Comment) :> Delete '[ JSON] ()
 
 type CommentAPI
-   = GetAllComments :<|> GetComments1 :<|> GetComments2 :<|> GetComments3 :<|> PostComment :<|> DeleteComment
+   = GetAllComments :<|> GetComments1 :<|> GetComments2 :<|> GetComments3 :<|> PostAnonymousComment :<|> PostComment :<|> DeleteComment
 
 commentAPI :: Proxy CommentAPI
 commentAPI = Proxy
@@ -54,6 +57,7 @@ commentServer :: Server CommentAPI
 commentServer =
   getAllComments :<|> getByDeckComments :<|> getBySlideComments :<|>
   getBySlideAuthorComments :<|>
+  postAnonymousComment :<|>
   postComment :<|>
   deleteComment
 
@@ -137,15 +141,20 @@ postComment did sid token markdown =
     now <- getCurrentTime
     runSqlite "db/engine.db" $ do
       when (Text.null did || Text.null sid) $ fail "Fucking idiot."
-      if Text.null token
-        then insert $ Comment markdown did sid Nothing now
-        else do
-          maybeKey <- fmap entityKey <$> selectFirst [PersonToken ==. token] []
-          case maybeKey of
-            Just key -> insert $ Comment markdown did sid maybeKey now
-            Nothing -> do
-              key <- insert $ Person token
-              insert $ Comment markdown did sid (Just key) now
+      maybeKey <- fmap entityKey <$> selectFirst [PersonToken ==. token] []
+      case maybeKey of
+        Just key -> insert $ Comment markdown did sid maybeKey now
+        Nothing -> do
+          key <- insert $ Person token
+          insert $ Comment markdown did sid (Just key) now
+
+postAnonymousComment :: Text -> Text -> Text -> Handler CommentId
+postAnonymousComment did sid markdown =
+  liftIO $ do
+    now <- getCurrentTime
+    runSqlite "db/engine.db" $ do
+      when (Text.null did || Text.null sid) $ fail "Fucking idiot."
+      insert $ Comment markdown did sid Nothing now
 
 deleteComment :: Key Comment -> Handler ()
 deleteComment key = liftIO $ runSqlite "db/engine.db" $ do delete key
