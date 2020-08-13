@@ -22,18 +22,21 @@ open: build
 install-service: build
 	mkdir -p /home/henrik/.config/systemd/user
 	cp decker-engine.service /home/henrik/.config/systemd/user
+	systemctl --user stop decker-engine
 	systemctl --user daemon-reload
+	systemctl --user enable decker-engine
+	systemctl --user start decker-engine
 
 start: install-service
 	systemctl --user start decker-engine
 
-stop: install-service
+stop: 
 	systemctl --user stop decker-engine
 
-status: install-service
+status: 
 	systemctl --user status decker-engine
 
-restart: install-service
+restart: 
 	systemctl --user restart decker-engine
 
 daemon: build kill
