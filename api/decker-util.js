@@ -1,8 +1,13 @@
 function submitComment(getContext, container, textarea) {
   let context = getContext();
+  console.log("submit");
+  console.log(context);
+  console.log(textarea);
+
   if (!textarea.value) {
     return;
   }
+
 
   postCommentsByDeckBySlideByAuthor(
     context.deck,

@@ -1,10 +1,12 @@
 [Unit]
-Description=Decker Engine.
+Description=Decker Engine
+Requires=apache2.service
+After=apache2.service
 
 [Service]
 Type=forking
 Restart=always
-RestartSec=3
+RestartSec=5
 Environment="DECKER_BASE_URL=/decker"
 ExecStart=/usr/bin/daemonize \
   -c /home/henrik/workspace/decker-engine \
@@ -13,3 +15,4 @@ ExecStart=/usr/bin/daemonize \
 
 [Install]
 WantedBy=multi-user.target
+WantedBy=apache2.service
