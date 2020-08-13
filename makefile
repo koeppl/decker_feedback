@@ -4,9 +4,11 @@ directory := $(PWD)
 pidfile := decker-engine.pid
 lockfile := decker-engine.lock
 
+build-all: build
+	decker html
+
 build:
 	stack build
-	decker html
 
 run: build
 	stack run -- decker-engine
