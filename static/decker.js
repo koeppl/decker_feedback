@@ -1,7 +1,7 @@
 
 var getComments = function(onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/comments', true);
+  xhr.open('GET', '/decker/comments', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -22,7 +22,7 @@ var getComments = function(onSuccess, onError) {
 
 var getCommentsByDeck = function(deck, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/comments/' + encodeURIComponent(deck) + '', true);
+  xhr.open('GET', '/decker/comments/' + encodeURIComponent(deck) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -43,7 +43,7 @@ var getCommentsByDeck = function(deck, onSuccess, onError) {
 
 var getCommentsByDeckBySlide = function(deck, slide, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '', true);
+  xhr.open('GET', '/decker/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -64,7 +64,7 @@ var getCommentsByDeckBySlide = function(deck, slide, onSuccess, onError) {
 
 var getCommentsByDeckBySlideByAuthor = function(deck, slide, author, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(author) + '', true);
+  xhr.open('GET', '/decker/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(author) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -85,7 +85,7 @@ var getCommentsByDeckBySlideByAuthor = function(deck, slide, author, onSuccess, 
 
 var postCommentsByDeckBySlide = function(deck, slide, body, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '', true);
+  xhr.open('POST', '/decker/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onreadystatechange = function () {
@@ -107,7 +107,7 @@ var postCommentsByDeckBySlide = function(deck, slide, body, onSuccess, onError) 
 
 var postCommentsByDeckBySlideByAuthor = function(deck, slide, author, body, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(author) + '', true);
+  xhr.open('POST', '/decker/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(author) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onreadystatechange = function () {
@@ -129,7 +129,7 @@ var postCommentsByDeckBySlideByAuthor = function(deck, slide, author, body, onSu
 
 var deleteCommentsById = function(id, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('DELETE', '/comments/' + encodeURIComponent(id) + '', true);
+  xhr.open('DELETE', '/decker/comments/' + encodeURIComponent(id) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -150,7 +150,7 @@ var deleteCommentsById = function(id, onSuccess, onError) {
 
 var getAuthors = function(onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/authors', true);
+  xhr.open('GET', '/decker/authors', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -171,7 +171,7 @@ var getAuthors = function(onSuccess, onError) {
 
 var getAuthorsById = function(id, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/authors/' + encodeURIComponent(id) + '', true);
+  xhr.open('GET', '/decker/authors/' + encodeURIComponent(id) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;

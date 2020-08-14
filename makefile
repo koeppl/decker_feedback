@@ -10,36 +10,30 @@ build-all: build
 build:
 	stack build
 
+runerver: build
+	run -- decker-engine
+
 run: build
 	stack run -- decker-engine
 
 install:
 	stack install
-	systemctl --user restart decker-engine
 
 open: build
 	(sleep 2; open -a firefox http://localhost:8081/api-test.html)&
 	stack run -- decker-engine
 
-install-service: build
-	mkdir -p /home/henrik/.config/systemd/user
-	cp decker-engine.service /home/henrik/.config/systemd/user
-	systemctl --user stop decker-engine
-	systemctl --user daemon-reload
-	systemctl --user enable decker-engine
-	systemctl --user start decker-engine
+install-service: install
+	sudo systemctl stop decker-engine
+	sudo cp decker-engine.service /etc/systemd/system
+	sudo cp ~/.local/bin/decker-engine /usr/local/bin
+	sudo cp ~/.local/bin/decker-daemon /usr/local/bin
+	sudo cp -r static/* /var/local/decker/static
+	sudo chown -R decker:decker /var/local/decker
+	sudo systemctl daemon-reload
+	sudo systemctl enable decker-engine
+	sudo systemctl start decker-engine
 
-start: install-service
-	systemctl --user start decker-engine
-
-stop: 
-	systemctl --user stop decker-engine
-
-status: 
-	systemctl --user status decker-engine
-
-restart: 
-	systemctl --user restart decker-engine
 
 daemon: build kill
 	daemonize -c $(directory) -p $(pidfile) -l $(lockfile) $(decker-engine)
