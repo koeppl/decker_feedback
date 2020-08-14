@@ -67,7 +67,7 @@ function fillContainer(getContext, container, list) {
             let del = document.createElement("button");
             del.textContent = "✖";
             del.addEventListener("click", _ => {
-              deleteCommentsById(
+              api.deleteCommentsById(
                 key,
                 _ => {
                   api.updateCommentList(getContext, container);
