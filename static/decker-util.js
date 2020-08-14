@@ -70,7 +70,7 @@ function fillContainer(getContext, container, list) {
               api.deleteCommentsById(
                 key,
                 _ => {
-                  api.updateCommentList(getContext, container);
+                  updateCommentList(getContext, container);
                 },
                 err => {
                   console.log(err);
