@@ -48,22 +48,23 @@ dependencies:
   - transformers
   - wai
   - wai-extra
+  - wai-cors
   - warp
 
 library:
   source-dirs: src
 
 executables:
-  decker-daemon:
-    main: Daemon
-    source-dirs: app
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
-    dependencies:
-      - base
-      - decker-engine
+  #decker-daemon:
+    #main: Daemon
+    #source-dirs: app
+    #ghc-options:
+      #- -threaded
+      #- -rtsopts
+      #- -with-rtsopts=-N
+    #dependencies:
+      #- base
+      #- decker-engine
   decker-engine:
     main: Main
     source-dirs: app

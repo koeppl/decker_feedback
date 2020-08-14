@@ -1,3 +1,5 @@
+import * as api from "./decker.js"
+
 function submitComment(getContext, container, textarea) {
   let context = getContext();
 
@@ -6,7 +8,7 @@ function submitComment(getContext, container, textarea) {
   }
 
   if (context.token) {
-    postCommentsByDeckBySlideByAuthor(
+    api.postCommentsByDeckBySlideByAuthor(
       context.deck,
       context.slide,
       context.token,
@@ -20,7 +22,7 @@ function submitComment(getContext, container, textarea) {
       }
     );
   } else {
-    postCommentsByDeckBySlide(
+    api.postCommentsByDeckBySlide(
       context.deck,
       context.slide,
       textarea.value,
@@ -37,7 +39,7 @@ function submitComment(getContext, container, textarea) {
 
 function updateCommentList(getContext, container) {
   let context = getContext();
-  getCommentsByDeckBySlide(
+  api.getCommentsByDeckBySlide(
     context.deck,
     context.slide,
     list => {
@@ -58,7 +60,7 @@ function fillContainer(getContext, container, list) {
     let div = document.createElement("div");
     div.textContent = comment.markdown;
     if (comment.author) {
-      getAuthorsById(
+      api.getAuthorsById(
         comment.author,
         author => {
           if (author.token === context.token) {
@@ -68,7 +70,7 @@ function fillContainer(getContext, container, list) {
               deleteCommentsById(
                 key,
                 _ => {
-                  updateCommentList(getContext, container);
+                  api.updateCommentList(getContext, container);
                 },
                 err => {
                   console.log(err);
@@ -87,3 +89,5 @@ function fillContainer(getContext, container, list) {
   }
   container.scrollTop = 0;
 }
+
+export {updateCommentList, submitComment};

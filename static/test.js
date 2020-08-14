@@ -1,4 +1,7 @@
-window.addEventListener("load", e => {
+//import { updateCommentList, submitComment } from "./decker-util.js";
+import * as util from "./decker-util.js";
+
+window.addEventListener("load", _ => {
   let deckid = document.getElementById("deckid");
   let slideid = document.getElementById("slideid");
   let token = document.getElementById("persontoken");
@@ -18,31 +21,40 @@ window.addEventListener("load", e => {
   };
 
   deckid.addEventListener("keydown", e => {
-    if (e.key === "Enter") updateCommentList(getContext, container);
+    if (e.key === "Enter") {
+      util.updateCommentList(getContext, container);
+      document.activeElement.blur();
+    }
   });
 
   slideid.addEventListener("keydown", e => {
-    if (e.key === "Enter") updateCommentList(getContext, container);
+    if (e.key === "Enter") {
+      util.updateCommentList(getContext, container);
+      document.activeElement.blur();
+    }
   });
 
   token.addEventListener("keydown", e => {
-    if (e.key === "Enter") updateCommentList(getContext, container);
+    if (e.key === "Enter") {
+      util.updateCommentList(getContext, container);
+      document.activeElement.blur();
+    }
   });
 
   update.addEventListener("click", _ => {
-    updateCommentList(getContext, container);
+    util.updateCommentList(getContext, container);
   });
 
   textarea.addEventListener("keydown", e => {
     if (e.key === "Enter" && e.shiftKey) {
-      submitComment(getContext, container, textarea);
+      util.submitComment(getContext, container, textarea);
+      document.activeElement.blur();
     }
   });
 
   submit.addEventListener("click", _ => {
-    submitComment(getContext, container, textarea);
+    util.submitComment(getContext, container, textarea);
   });
 
-  updateCommentList(getContext, container);
+  util.updateCommentList(getContext, container);
 });
-

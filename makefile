@@ -4,17 +4,11 @@ directory := $(PWD)
 pidfile := decker-engine.pid
 lockfile := decker-engine.lock
 
-build-all: build
-	decker html
-
 build:
 	stack build
 
-runerver: build
-	run -- decker-engine
-
-run: build
-	stack run -- decker-engine
+run-local: build
+	DECKER_BASE_URL=http://localhost:8081 stack run -- decker-engine
 
 install:
 	stack install
@@ -34,11 +28,3 @@ install-service: install
 	sudo systemctl enable decker-engine
 	sudo systemctl start decker-engine
 
-
-daemon: build kill
-	daemonize -c $(directory) -p $(pidfile) -l $(lockfile) $(decker-engine)
-
-kill:
-	if [ -f $(pidfile) ]; then \
-		kill `cat $(pidfile)` && rm -f $(lockfile) $(pidfile); \
-	fi

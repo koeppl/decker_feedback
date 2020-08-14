@@ -4,12 +4,14 @@
 module Engine where
 
 import Control.Monad.Logger
+import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Data.Time.Clock
 import Database.Persist
 import Database.Persist.Sqlite
 import Network.Wai
 import Network.Wai.Handler.Warp
+import Network.Wai.Middleware.Cors
 import Relude hiding (group)
 import Servant
 import Servant.JS
@@ -22,7 +24,7 @@ import API
 import Model
 
 app :: Application
-app = serve deckerAPI deckerServer
+app = simpleCors $ serve deckerAPI deckerServer
 
 daemon :: IO ()
 daemon = do
@@ -30,12 +32,21 @@ daemon = do
   rootDir <- fromMaybe "." <$> lookupEnv "DECKER_ROOT_DIR"
   setCurrentDirectory rootDir
   Text.writeFile ("static/decker.js") $
+    addExport $
     jsForAPI
       jsAPI
       (vanillaJSWith defCommonGeneratorOptions {urlPrefix = toText baseUrl})
   saveDocs "static/doc.md"
   runSqlite "db/engine.db" $ do runMigration migrateAll
   run 8081 app
+
+addExport :: Text -> Text
+addExport = Text.unlines . map insert . Text.lines
+  where
+    insert line =
+      if "var " `Text.isPrefixOf` line
+        then "export " <> line
+        else line
 
 mock :: ReaderT SqlBackend IO (Key Comment)
 mock = do
