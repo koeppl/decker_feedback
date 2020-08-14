@@ -1,18 +1,13 @@
 [Unit]
 Description=Decker Engine
-Requires=apache2.service
-After=apache2.service
 
 [Service]
 Type=forking
-Restart=always
-RestartSec=5
-Environment="DECKER_BASE_URL=/decker"
+Environment="DECKER_BASE_URL=https://tramberend.beuth-hochschule.de/decker" "DECKER_ROOT_DIR=/var/local/decker"
 ExecStart=/usr/bin/daemonize \
-  -c /home/henrik/workspace/decker-engine \
-  -p /home/henrik/workspace/decker-engine/decker-engine.pid \
-  /home/henrik/.local/bin/decker-engine 
+  -c /var/local/decker
+  -u decker
+  /usr/local/bin/decker-engine
 
 [Install]
 WantedBy=multi-user.target
-WantedBy=apache2.service

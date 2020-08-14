@@ -22,14 +22,17 @@ dependencies:
   - base >= 4.7 && < 5
   - aeson
   - blaze-html
-  - http-types
-  - http-api-data
   - bytestring
   - conduit
   - containers
+  - directory
   - either
   - fast-logger
+  - filepath
+  - hdaemonize
+  - http-api-data
   - http-media
+  - http-types
   - monad-logger
   - mtl
   - persistent
@@ -51,6 +54,16 @@ library:
   source-dirs: src
 
 executables:
+  decker-daemon:
+    main: Daemon
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - base
+      - decker-engine
   decker-engine:
     main: Main
     source-dirs: app
@@ -61,7 +74,6 @@ executables:
     dependencies:
       - base
       - decker-engine
-      - hdaemonize
 
 tests:
   decker-engine-test:

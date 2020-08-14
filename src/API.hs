@@ -25,6 +25,7 @@ import Servant
 import Servant.API
 import Servant.Docs
 import Servant.Server
+import System.FilePath
 import Web.FormUrlEncoded (FromForm(..), ToForm(..))
 
 type GetAllComments = "comments" :> Get '[ JSON] [Comment]
@@ -84,21 +85,18 @@ docs = toText . markdown $ docsWithIntros [intro] deckerAPI
 saveDocs :: FilePath -> IO ()
 saveDocs path = Text.writeFile path API.docs
 
-type DeckerAPI
-   = CommentAPI :<|> AuthorAPI :<|> "api" :> Raw :<|> "public" :> Raw
+type DeckerAPI = CommentAPI :<|> AuthorAPI :<|> Raw
 
 deckerAPI :: Proxy DeckerAPI
 deckerAPI = Proxy
 
 deckerServer :: Server DeckerAPI
 deckerServer =
-  commentServer :<|> authorServer :<|> serveDirectoryWebApp "api" :<|>
-  serveDirectoryWebApp "public"
+  commentServer :<|> authorServer :<|> serveDirectoryWebApp "static"
 
 getAllComments :: Handler [Comment]
 getAllComments =
   liftIO $ do
-    putStrLn "get all comments"
     runSqlite "db/engine.db" $ do map entityVal <$> selectList [] []
 
 getByDeckComments :: Text -> Handler [Comment]

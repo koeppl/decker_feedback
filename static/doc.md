@@ -4,7 +4,7 @@ This is the decker engine webservice's API.
 
 Enjoy!
 
-## GET /api
+## GET /
 
 ### Response:
 
@@ -220,15 +220,6 @@ Enjoy!
 
     - `application/json;charset=utf-8`
     - `application/json`
-
-- No response body
-
-## GET /public
-
-### Response:
-
-- Status code 200
-- Headers: []
 
 - No response body
 
