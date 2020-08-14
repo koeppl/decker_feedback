@@ -23,9 +23,25 @@ import System.FilePath
 import API
 import Model
 
-app :: Application
 -- app = simpleCors $ serve deckerAPI deckerServer
-app = serve deckerAPI deckerServer
+app :: Application
+app = corsWare $ serve deckerAPI deckerServer
+
+corsPolicy :: CorsResourcePolicy
+corsPolicy =
+  CorsResourcePolicy
+    { corsOrigins = Nothing
+    , corsMethods = ["GET", "HEAD", "POST", "DELETE"]
+    , corsRequestHeaders = ["Authorization", "Content-Type"]
+    , corsExposedHeaders = Just ["Content-Type"]
+    , corsMaxAge = Nothing
+    , corsVaryOrigin = False
+    , corsRequireOrigin = False
+    , corsIgnoreFailures = False
+    }
+
+corsWare :: Middleware
+corsWare = cors (const $ Just corsPolicy)
 
 daemon :: IO ()
 daemon = do
