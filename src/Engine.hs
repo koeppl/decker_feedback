@@ -24,8 +24,8 @@ import API
 import Model
 
 app :: Application
--- app = simpleCors $ serve deckerAPI deckerServer
-app = serve deckerAPI deckerServer
+app = simpleCors $ serve deckerAPI deckerServer
+-- app = serve deckerAPI deckerServer
 
 daemon :: IO ()
 daemon = do
