@@ -127,9 +127,9 @@ export var postCommentsByDeckBySlideByAuthor = function(deck, slide, author, bod
   xhr.send(JSON.stringify(body));
 };
 
-export var deleteCommentsById = function(id, onSuccess, onError) {
+export var deleteCommentsByIdByToken = function(id, token, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('DELETE', 'http://localhost:8081/comments/' + encodeURIComponent(id) + '', true);
+  xhr.open('DELETE', 'http://localhost:8081/comments/' + encodeURIComponent(id) + '/' + encodeURIComponent(token) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;

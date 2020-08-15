@@ -1,9 +1,9 @@
-import * as api from "./decker.js"
+import * as api from "./decker.js";
 
-function submitComment(getContext, container, textarea) {
+function submitComment(getContext, text, render) {
   let context = getContext();
 
-  if (!textarea.value) {
+  if (!text) {
     return;
   }
 
@@ -12,10 +12,9 @@ function submitComment(getContext, container, textarea) {
       context.deck,
       context.slide,
       context.token,
-      textarea.value,
+      text,
       _ => {
-        textarea.value = "";
-        updateCommentList(getContext, container);
+        render();
       },
       err => {
         console.log(err);
@@ -25,10 +24,9 @@ function submitComment(getContext, container, textarea) {
     api.postCommentsByDeckBySlide(
       context.deck,
       context.slide,
-      textarea.value,
+      text,
       _ => {
-        textarea.value = "";
-        updateCommentList(getContext, container);
+        render();
       },
       err => {
         console.log(err);
@@ -37,13 +35,41 @@ function submitComment(getContext, container, textarea) {
   }
 }
 
-function updateCommentList(getContext, container) {
+function updateCommentList(getContext, render) {
   let context = getContext();
-  api.getCommentsByDeckBySlide(
-    context.deck,
-    context.slide,
-    list => {
-      fillContainer(getContext, container, list);
+  if (context.token !== "") {
+    api.getCommentsByDeckBySlideByAuthor(
+      context.deck,
+      context.slide,
+      context.token,
+      list => {
+        render(list);
+      },
+      err => {
+        console.log(err);
+      }
+    );
+  } else {
+    api.getCommentsByDeckBySlide(
+      context.deck,
+      context.slide,
+      list => {
+        render(list);
+      },
+      err => {
+        console.log(err);
+      }
+    );
+  }
+}
+
+function deleteComment(getContext, key, render) {
+  let context = getContext();
+  api.deleteCommentsByIdByToken(
+    key,
+    context.token,
+    _ => {
+      render();
     },
     err => {
       console.log(err);
@@ -67,10 +93,11 @@ function fillContainer(getContext, container, list) {
             let del = document.createElement("button");
             del.textContent = "✖";
             del.addEventListener("click", _ => {
-              api.deleteCommentsById(
+              api.deleteCommentsByIdByToken(
                 key,
+                context.token,
                 _ => {
-                  updateCommentList(getContext, container);
+                  updateCommentList(getContext);
                 },
                 err => {
                   console.log(err);
@@ -90,4 +117,4 @@ function fillContainer(getContext, container, list) {
   container.scrollTop = 0;
 }
 
-export {updateCommentList, submitComment};
+export { updateCommentList, submitComment, deleteComment };

@@ -23,7 +23,6 @@ import System.FilePath
 import API
 import Model
 
--- app = simpleCors $ serve deckerAPI deckerServer
 app :: Application
 app = corsWare $ serve deckerAPI deckerServer
 
