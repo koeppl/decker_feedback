@@ -1,4 +1,3 @@
-//import { updateCommentList, submitComment } from "./decker-util.js";
 import * as util from "./decker-util.js";
 
 window.addEventListener("load", _ => {
@@ -36,6 +35,7 @@ window.addEventListener("load", _ => {
     while (container.firstChild) {
       container.removeChild(container.lastChild);
     }
+    console.log(list);
     for (let comment of list) {
       let div = document.createElement("div");
       div.textContent = comment.html;

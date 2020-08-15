@@ -160,7 +160,9 @@ getBySlideAuthorComments did sid token
         in View.Comment
              (commentMarkdown c)
              (commentCreated c)
-             (if commentAuthor c == a then Just (entityKey e) else Nothing)
+             (if isJust a && commentAuthor c == a
+                 then Just (entityKey e)
+                 else Nothing)
 
 postComment :: Text -> Text -> Text -> Text -> Handler CommentId
 postComment did sid token markdown
