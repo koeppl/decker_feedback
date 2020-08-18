@@ -1,4 +1,0 @@
-title: Decker Engine
-publish:
-  rsync:
-    destination: henrik@tramberend.beuth-hochschule.de:/home/henrik/workspace/decker-engine/public

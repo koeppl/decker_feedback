@@ -31,11 +31,9 @@ window.addEventListener("load", _ => {
   };
 
   let renderList = list => {
-    let context = getContext();
     while (container.firstChild) {
       container.removeChild(container.lastChild);
     }
-    console.log(list);
     for (let comment of list) {
       let div = document.createElement("div");
       div.textContent = comment.html;
@@ -90,5 +88,11 @@ window.addEventListener("load", _ => {
     document.activeElement.blur();
   });
 
-  util.updateCommentList(getContext, renderList);
+  // util.updateCommentList(getContext, renderList);
+
+  let context = getContext();
+  util
+    .getComments(context.deck, context.slide, context.token)
+    .then(renderList)
+    .catch(console.log);
 });

@@ -1,5 +1,13 @@
 import * as api from "./decker.js";
 
+export {
+  getToken,
+  getComments,
+  updateCommentList,
+  submitComment,
+  deleteComment
+};
+
 function submitComment(getContext, text, render) {
   let context = getContext();
 
@@ -33,6 +41,60 @@ function submitComment(getContext, text, render) {
       }
     );
   }
+}
+
+function getComments(deck, slide, token) {
+  return new Promise(function(resolve, reject) {
+    api.getCommentsByDeckBySlideByAuthor(deck, slide, token, resolve, err => {
+      reject({
+        status: undefined,
+        statusText: err
+      });
+    });
+  });
+}
+
+function getToken() {
+  let token = new Promise(function(resolve, reject) {
+    getTokenInternal(resolve, err => {
+      reject({
+        status: undefined,
+        statusText: err
+      });
+    });
+  });
+  return token;
+}
+
+function getTokenInternal(onSuccess, onError) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "http://localhost:8081/token", true);
+  // xhr.setRequestHeader("Authorization", headerAuthorization);
+  xhr.withCredentials = true;
+  xhr.setRequestHeader("Accept", "application/json");
+  xhr.onreadystatechange = function() {
+    var res = null;
+    if (xhr.readyState === 4) {
+      if (xhr.status === 204 || xhr.status === 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          res = JSON.parse(xhr.responseText);
+        } catch (e) {
+          onError(e);
+        }
+        if (res) onSuccess(res);
+      } else {
+        try {
+          res = JSON.parse(xhr.responseText);
+        } catch (e) {
+          onError(e);
+        }
+        if (res) onError(res);
+      }
+    }
+  };
+  xhr.send(null);
 }
 
 function updateCommentList(getContext, render) {
@@ -116,5 +178,3 @@ function fillContainer(getContext, container, list) {
   }
   container.scrollTop = 0;
 }
-
-export { updateCommentList, submitComment, deleteComment };

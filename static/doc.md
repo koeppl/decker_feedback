@@ -224,3 +224,21 @@ Enjoy!
 
 - No response body
 
+## GET /token
+
+### Headers:
+
+- This endpoint is sensitive to the value of the **Authorization** HTTP header.
+
+### Response:
+
+- Status code 200
+- Headers: []
+
+- Supported content types are:
+
+    - `application/json;charset=utf-8`
+    - `application/json`
+
+- No response body
+

@@ -24,7 +24,7 @@ import Mock
 
 import Model
 
-import Network.HTTP.Types
+import Network.HTTP.Types hiding ( Header )
 import Network.Wai
 
 import Relude hiding ( get )
@@ -35,6 +35,8 @@ import Servant.Docs
 import Servant.Server
 
 import System.FilePath
+
+import Token
 
 import qualified View as View
 
@@ -66,7 +68,8 @@ type DeleteComment
   :> Capture "token" Text :> Delete '[JSON] ()
 
 type CommentAPI
-  = GetAllComments :<|> GetComments1 :<|> GetComments2 :<|> GetComments3
+  = GetToken
+  :<|> GetAllComments :<|> GetComments1 :<|> GetComments2 :<|> GetComments3
   :<|> PostAnonymousComment :<|> PostComment :<|> DeleteComment
 
 commentAPI :: Proxy CommentAPI
@@ -74,7 +77,8 @@ commentAPI = Proxy
 
 commentServer :: Server CommentAPI
 commentServer
-  = getAllComments
+  = getToken
+  :<|> getAllComments
   :<|> getByDeckComments
   :<|> getBySlideComments
   :<|> getBySlideAuthorComments

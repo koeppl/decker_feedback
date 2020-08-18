@@ -1,4 +1,26 @@
 
+export var getToken = function(headerAuthorization, onSuccess, onError) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'http://localhost:8081/token', true);
+  xhr.setRequestHeader("Authorization", headerAuthorization);
+  xhr.setRequestHeader('Accept', 'application/json');
+  xhr.onreadystatechange = function () {
+    var res = null;
+    if (xhr.readyState === 4) {
+      if (xhr.status === 204 || xhr.status === 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        try { res = JSON.parse(xhr.responseText); } catch (e) { onError(e); }
+        if (res) onSuccess(res);
+      } else {
+        try { res = JSON.parse(xhr.responseText); } catch (e) { onError(e); }
+        if (res) onError(res);
+      }
+    }
+  };
+  xhr.send(null);
+};
+
 export var getComments = function(onSuccess, onError) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', 'http://localhost:8081/comments', true);

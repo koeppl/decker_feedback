@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 66f65d17481bf9a3e0b868cb5ca2fcfa65dbe6ea588906ae3b84b48b853d5007
+-- hash: a2b2833cdda3c008f6791678bf3dd3add2980db62e4c2fe0241f80ca08cab774
 
 name:           decker-engine
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       Lib
       Mock
       Model
+      Token
       View
   other-modules:
       Paths_decker_engine
