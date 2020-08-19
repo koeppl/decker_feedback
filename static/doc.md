@@ -142,6 +142,12 @@ Enjoy!
     - `application/json;charset=utf-8`
     - `application/json`
 
+- Example (`application/json;charset=utf-8`, `application/json`):
+
+```javascript
+{"html":"This is not the most sensible comment:"}
+```
+
 ### Response:
 
 - Status code 200
@@ -154,13 +160,13 @@ Enjoy!
 
 - No response body
 
-## GET /comments/:deck/:slide/:author
+## GET /comments/:deck/:slide/:token
 
 ### Captures:
 
 - *deck*: String id of the deck
 - *slide*: String id of the slide inside a deck
-- *author*: Identifying token for a person
+- *token*: Identifying token for a person
 
 ### Response:
 
@@ -178,13 +184,13 @@ Enjoy!
 []
 ```
 
-## POST /comments/:deck/:slide/:author
+## POST /comments/:deck/:slide/:token
 
 ### Captures:
 
 - *deck*: String id of the deck
 - *slide*: String id of the slide inside a deck
-- *author*: Identifying token for a person
+- *token*: Identifying token for a person
 
 ### Request:
 
@@ -192,6 +198,12 @@ Enjoy!
 
     - `application/json;charset=utf-8`
     - `application/json`
+
+- Example (`application/json;charset=utf-8`, `application/json`):
+
+```javascript
+{"html":"This is not the most sensible comment:"}
+```
 
 ### Response:
 
@@ -240,5 +252,9 @@ Enjoy!
     - `application/json;charset=utf-8`
     - `application/json`
 
-- No response body
+- Example (`application/json;charset=utf-8`, `application/json`):
+
+```javascript
+{"text":"ajh4ffdg"}
+```
 

@@ -50,6 +50,8 @@ dependencies:
   - wai-extra
   - wai-cors
   - warp
+  - pureMD5
+  - random
 
 library:
   source-dirs: src

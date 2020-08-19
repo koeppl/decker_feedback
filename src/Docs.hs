@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
@@ -21,6 +22,8 @@ import Servant.API
 import Servant.Docs
 import Servant.Docs
 import Servant.Server
+
+import Token
 
 import qualified View
 
@@ -53,6 +56,13 @@ instance ToSample (Key Comment) where
 instance ToSample Text where
   toSamples _ = noSamples
 
+instance ToSample View.CommentData where
+  toSamples _
+    = singleSample (View.CommentData "This is not the most sensible comment:")
+
+instance ToSample Token where
+  toSamples _ = singleSample (Token "ajh4ffdg")
+
 instance ToSample () where
   toSamples _ = noSamples
 
@@ -64,6 +74,9 @@ instance ToCapture (Capture "id" (Key View.Comment)) where
 
 instance ToCapture (Capture "id" (Key Person)) where
   toCapture _ = DocCapture "id" "Integer id a person"
+
+instance MimeRender PlainText () where
+  mimeRender _ _ = ""
 
 intro
   = DocIntro

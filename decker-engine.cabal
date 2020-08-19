@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a2b2833cdda3c008f6791678bf3dd3add2980db62e4c2fe0241f80ca08cab774
+-- hash: 3ee893603eb04dfb919df94cf7c521827f14aa8a2fdea89ebf457f296464d2fb
 
 name:           decker-engine
 version:        0.1.0.0
@@ -60,6 +60,8 @@ library
     , persistent
     , persistent-sqlite
     , persistent-template
+    , pureMD5
+    , random
     , relude
     , servant
     , servant-docs
@@ -103,6 +105,8 @@ executable decker-engine
     , persistent
     , persistent-sqlite
     , persistent-template
+    , pureMD5
+    , random
     , relude
     , servant
     , servant-docs
@@ -149,6 +153,8 @@ test-suite decker-engine-test
     , persistent
     , persistent-sqlite
     , persistent-template
+    , pureMD5
+    , random
     , relude
     , servant
     , servant-docs

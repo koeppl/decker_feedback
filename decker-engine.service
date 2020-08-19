@@ -3,7 +3,7 @@ Description=Decker Engine
 
 [Service]
 Type=simple
-Environment="DECKER_BASE_URL=https://tramberend.beuth-hochschule.de/decker" "DECKER_ROOT_DIR=/var/local/decker"
+WorkingDirectory=/var/local/decker
 ExecStart=/usr/local/bin/decker-engine
 User=decker
 Group=decker

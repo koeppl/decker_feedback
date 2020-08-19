@@ -53,15 +53,15 @@ type GetComments2
 
 type GetComments3
   = "comments" :> Capture "deck" Text :> Capture "slide" Text
-  :> Capture "author" Text :> Get '[JSON] [ View.Comment ]
+  :> Capture "token" Text :> Get '[JSON] [ View.Comment ]
 
 type PostAnonymousComment
   = "comments" :> Capture "deck" Text
-  :> Capture "slide" Text :> ReqBody '[JSON] Text :> Post '[JSON] CommentId
+  :> Capture "slide" Text :> ReqBody '[JSON] View.CommentData :> Post '[JSON] ()
 
 type PostComment
   = "comments" :> Capture "deck" Text :> Capture "slide" Text
-  :> Capture "author" Text :> ReqBody '[JSON] Text :> Post '[JSON] CommentId
+  :> Capture "token" Text :> ReqBody '[JSON] View.CommentData :> Post '[JSON] ()
 
 type DeleteComment
   = "comments" :> Capture "id" (Key Comment)
@@ -168,26 +168,41 @@ getBySlideAuthorComments did sid token
                  then Just (entityKey e)
                  else Nothing)
 
-postComment :: Text -> Text -> Text -> Text -> Handler CommentId
-postComment did sid token markdown
+postComment :: Text -> Text -> Text -> View.CommentData -> Handler ()
+postComment did sid token cdata
   = liftIO
   $ do now <- getCurrentTime
        runSqlite "db/engine.db"
          $ do when (Text.null did || Text.null sid) $ fail "Fucking idiot."
-              maybeKey
+              person
                 <- fmap entityKey <$> selectFirst [ PersonToken ==. token ] []
-              case maybeKey of
-                Just key -> insert $ Comment markdown did sid maybeKey now
+              case person of
+                Just key -> do insert
+                                 $ Comment
+                                   (View.commentDataHtml cdata)
+                                   did
+                                   sid
+                                   person
+                                   now
+                               return ()
                 Nothing -> do key <- insert $ Person token
-                              insert $ Comment markdown did sid (Just key) now
+                              insert
+                                $ Comment
+                                  (View.commentDataHtml cdata)
+                                  did
+                                  sid
+                                  (Just key)
+                                  now
+                              return ()
 
-postAnonymousComment :: Text -> Text -> Text -> Handler CommentId
-postAnonymousComment did sid markdown
+postAnonymousComment :: Text -> Text -> View.CommentData -> Handler ()
+postAnonymousComment did sid cdata
   = liftIO
   $ do now <- getCurrentTime
        runSqlite "db/engine.db"
          $ do when (Text.null did || Text.null sid) $ fail "Fucking idiot."
-              insert $ Comment markdown did sid Nothing now
+              insert $ Comment (View.commentDataHtml cdata) did sid Nothing now
+              return ()
 
 deleteComment :: Key Comment -> Text -> Handler ()
 deleteComment key token

@@ -30,31 +30,28 @@ import System.Directory
 import System.Environment
 import System.FilePath
 
--- | Starts the server. If originStr is Nothing, no CORS header are served.
+-- | Starts the server. If policy is Nothing, no CORS headers are served.
 -- This mode is meant to be used behind an Apache proxy server that handles the
 -- generation of CORS headers. Otherwise, the list of CORS origin URLs is
 -- parsed and passed to the CORS middleware (with credentials enabled).
-app :: Maybe String -> Application
-app originStr
-  = case originStr of
+app :: Maybe CorsResourcePolicy -> Application
+app policy
+  = case policy of
+    Just policy -> corsWare policy $ serve deckerAPI deckerServer
     Nothing -> serve deckerAPI deckerServer
-    Just origins
-      -> do corsWare corsPolicy { corsOrigins = readOrigins origins }
-              $ serve deckerAPI deckerServer
 
 -- | Transform a comma separated string of origin URLs into a list for the cors 
 -- middleware.
 readOrigins :: String -> Maybe ( [ Origin ], Bool )
 readOrigins line
   = case map Text.strip $ Text.splitOn "," $ toText line of
-    [] -> Nothing
     [ "*" ] -> Nothing
     list -> Just ( map encodeUtf8 list, True )
 
-corsPolicy :: CorsResourcePolicy
-corsPolicy
+corsPolicy :: Maybe ( [ Origin ], Bool ) -> CorsResourcePolicy
+corsPolicy origins
   = CorsResourcePolicy
-  { corsOrigins = Nothing
+  { corsOrigins = origins
   , corsMethods = [ "GET", "HEAD", "POST", "DELETE" ]
   , corsRequestHeaders = [ "Authorization", "Content-Type" ]
   , corsExposedHeaders = Just [ "Content-Type" ]
@@ -65,23 +62,19 @@ corsPolicy
   }
 
 corsWare :: CorsResourcePolicy -> Middleware
-corsWare policy = cors (const $ Just policy)
+corsWare policy = do cors (const $ Just policy)
 
 daemon :: IO ()
 daemon
-  = do baseUrl <- fromMaybe "" <$> lookupEnv "DECKER_BASE_URL"
-       rootDir <- fromMaybe "." <$> lookupEnv "DECKER_ROOT_DIR"
-       corsOrigins <- lookupEnv "DECKER_CORS_ORIGINS"
-       setCurrentDirectory rootDir
-       Text.writeFile ("static/decker.js")
-         $ addExport
-         $ jsForAPI
-           jsAPI
-           (vanillaJSWith
-              defCommonGeneratorOptions { urlPrefix = toText baseUrl })
+  = do origins <- lookupEnv "DECKER_CORS_ORIGINS"
+       putStrLn $ "CORS origins: " <> fromMaybe "<unset>" origins
        saveDocs "static/doc.md"
        runSqlite "db/engine.db" $ do runMigration migrateAll
-       run 8081 (app corsOrigins)
+       let policy = corsPolicy . readOrigins <$> origins
+       if (isJust policy)
+          then putStrLn $ "CORS origins: " <> show (corsOrigins <$> policy)
+          else putStrLn "No CORS"
+       run 8081 (app policy)
 
 addExport :: Text -> Text
 addExport = Text.unlines . map insert . Text.lines

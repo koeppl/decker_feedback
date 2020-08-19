@@ -7,8 +7,11 @@ lockfile := decker-engine.lock
 build:
 	stack build
 
+run-local-cors: build
+	DECKER_CORS_ORIGINS="http://localhost:8081,http://localhost:8888" stack run -- decker-engine
+
 run-local: build
-	DECKER_BASE_URL=http://localhost:8081 stack run -- decker-engine
+	stack run -- decker-engine
 
 install:
 	stack install

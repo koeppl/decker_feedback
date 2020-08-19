@@ -84,9 +84,9 @@ export var getCommentsByDeckBySlide = function(deck, slide, onSuccess, onError) 
   xhr.send(null);
 };
 
-export var getCommentsByDeckBySlideByAuthor = function(deck, slide, author, onSuccess, onError) {
+export var getCommentsByDeckBySlideByToken = function(deck, slide, token, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:8081/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(author) + '', true);
+  xhr.open('GET', 'http://localhost:8081/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(token) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.onreadystatechange = function () {
     var res = null;
@@ -127,9 +127,9 @@ export var postCommentsByDeckBySlide = function(deck, slide, body, onSuccess, on
   xhr.send(JSON.stringify(body));
 };
 
-export var postCommentsByDeckBySlideByAuthor = function(deck, slide, author, body, onSuccess, onError) {
+export var postCommentsByDeckBySlideByToken = function(deck, slide, token, body, onSuccess, onError) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'http://localhost:8081/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(author) + '', true);
+  xhr.open('POST', 'http://localhost:8081/comments/' + encodeURIComponent(deck) + '/' + encodeURIComponent(slide) + '/' + encodeURIComponent(token) + '', true);
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onreadystatechange = function () {

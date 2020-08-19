@@ -19,7 +19,17 @@ data Comment
             , commentCreated :: UTCTime
             , commentDelete :: Maybe (Model.Key Model.Comment)
             }
+  deriving ( Show )
 
 $( deriveJSON
   defaultOptions { fieldLabelModifier = drop 7 . map toLower }
   ''Comment)
+
+data CommentData = CommentData { commentDataHtml :: Text }
+  deriving ( Show )
+
+$( deriveJSON
+  defaultOptions { fieldLabelModifier = drop 11 . map toLower }
+  ''CommentData)
+
+

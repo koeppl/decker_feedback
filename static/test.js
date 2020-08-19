@@ -1,6 +1,8 @@
-import * as util from "./decker-util.js";
+import buildApi from "./decker-util.js";
 
-window.addEventListener("load", _ => {
+let util = buildApi(".");
+
+window.addEventListener("load", async _ => {
   let deckid = document.getElementById("deckid");
   let slideid = document.getElementById("slideid");
   let token = document.getElementById("persontoken");
@@ -11,6 +13,11 @@ window.addEventListener("load", _ => {
   let textarea = document.getElementById("add-comment-1");
   let submit = document.getElementById("submit-button");
 
+  util
+    .getToken()
+    .then(console.log)
+    .catch(console.log);
+
   let getContext = () => {
     return {
       deck: deckid.value,
@@ -19,15 +26,21 @@ window.addEventListener("load", _ => {
     };
   };
 
-  let renderDelete = () => {
+  let updateComments = () => {
     let context = getContext();
-    util.updateCommentList(getContext, renderList);
+    util
+      .getComments(context.deck, context.slide, context.token)
+      .then(renderList)
+      .catch(console.log);
+  };
+
+  let renderDelete = () => {
+    updateComments();
   };
 
   let renderSubmit = () => {
-    let context = getContext();
+    updateComments();
     textarea.value = "";
-    util.updateCommentList(getContext, renderList);
   };
 
   let renderList = list => {
@@ -41,7 +54,10 @@ window.addEventListener("load", _ => {
         let del = document.createElement("button");
         del.textContent = "✖";
         del.addEventListener("click", _ => {
-          util.deleteComment(getContext, comment.delete, renderDelete);
+          let context = getContext();
+          util
+            .deleteComment(comment.delete, context.token)
+            .then(updateComments);
         });
         div.appendChild(del);
       }
@@ -52,47 +68,55 @@ window.addEventListener("load", _ => {
 
   deckid.addEventListener("keydown", e => {
     if (e.key === "Enter") {
-      util.updateCommentList(getContext, renderList);
+      updateComments();
       document.activeElement.blur();
     }
   });
 
   slideid.addEventListener("keydown", e => {
     if (e.key === "Enter") {
-      util.updateCommentList(getContext, renderList);
+      updateComments();
       document.activeElement.blur();
     }
   });
 
   token.addEventListener("keydown", e => {
     if (e.key === "Enter") {
-      util.updateCommentList(getContext, renderList);
+      updateComments();
       document.activeElement.blur();
     }
   });
 
   update.addEventListener("click", _ => {
-    util.updateCommentList(getContext, renderList);
+    updateComments();
     document.activeElement.blur();
   });
 
   textarea.addEventListener("keydown", e => {
     if (e.key === "Enter" && e.shiftKey) {
-      util.submitComment(getContext, textarea.value, renderSubmit);
+      let context = getContext();
+      util
+        .submitComment(
+          context.deck,
+          context.slide,
+          context.token,
+          textarea.value
+        )
+        .then(renderSubmit)
+        .catch(console.log);
       document.activeElement.blur();
     }
   });
 
   submit.addEventListener("click", _ => {
-    util.submitComment(getContext, textarea.value, renderSubmit);
+    let context = getContext();
+    util
+      .submitComment(context.deck, context.slide, context.token, textarea.value)
+      .then(renderSubmit)
+      .catch(console.log);
     document.activeElement.blur();
   });
 
-  // util.updateCommentList(getContext, renderList);
-
-  let context = getContext();
-  util
-    .getComments(context.deck, context.slide, context.token)
-    .then(renderList)
-    .catch(console.log);
+  updateComments();
+  document.activeElement.blur();
 });
