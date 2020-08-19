@@ -255,6 +255,6 @@ Enjoy!
 - Example (`application/json;charset=utf-8`, `application/json`):
 
 ```javascript
-{"text":"ajh4ffdg"}
+{"random":"ajh4ffdgx","authorized":null}
 ```
 

@@ -61,7 +61,7 @@ instance ToSample View.CommentData where
     = singleSample (View.CommentData "This is not the most sensible comment:")
 
 instance ToSample Token where
-  toSamples _ = singleSample (Token "ajh4ffdg")
+  toSamples _ = singleSample (Token "ajh4ffdgx" Nothing)
 
 instance ToSample () where
   toSamples _ = noSamples

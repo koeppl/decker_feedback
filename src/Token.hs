@@ -1,9 +1,9 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 module Token where
 
@@ -28,13 +28,12 @@ hash9 text = Text.pack $ take 9 $ show $ md5 $ encodeUtf8 text
 
 getToken :: (Maybe Text) -> Handler Token
 getToken authorization
-  = do liftIO $ putStrLn $ "authorization: " <> show authorization
+  = do rnd <- hash9 . show <$> (liftIO $ getStdRandom random :: Handler Word64)
        case authorization of
-         Just something -> return $ Token $ hash9 something
-         Nothing -> do rnd :: Word64 <- liftIO $ getStdRandom random
-                       return $ Token $ hash9 $ show rnd
+         Just credentials -> return $ Token rnd (Just $ hash9 credentials)
+         Nothing -> return $ Token rnd Nothing
 
-data Token = Token { tokenText :: Text }
+data Token = Token { tokenRandom :: Text, tokenAuthorized :: Maybe Text }
   deriving ( Show )
 
 $( deriveJSON
