@@ -13,17 +13,41 @@ window.addEventListener("load", async _ => {
   let textarea = document.getElementById("add-comment-1");
   let submit = document.getElementById("submit-button");
 
-  util
-    .getToken()
-    .then(console.log)
-    .catch(console.log);
+  var serverToken;
+
+  try {
+    serverToken = await util.getToken();
+  } catch (err) {
+    console.log("Can't fetch token from '.'. This is useless. Problem was:");
+    console.log(err);
+    return;
+  }
 
   let getContext = () => {
-    return {
-      deck: deckid.value,
-      slide: slideid.value,
-      token: token.value
-    };
+    if (serverToken.authorized) {
+      return {
+        deck: deckid.value,
+        slide: slideid.value,
+        token: serverToken.authorized
+      };
+    } else {
+      return { deck: deckid.value, slide: slideid.value, token: token.value };
+    }
+  };
+
+  let updateToken = () => {
+    if (serverToken.authorized) {
+      token.setAttribute("disabled", "disabled");
+      token.value = serverToken.authorized;
+    } else {
+      token.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          updateComments();
+          document.activeElement.blur();
+        }
+      });
+      token.value = serverToken.random;
+    }
   };
 
   let updateComments = () => {
@@ -32,10 +56,6 @@ window.addEventListener("load", async _ => {
       .getComments(context.deck, context.slide, context.token)
       .then(renderList)
       .catch(console.log);
-  };
-
-  let renderDelete = () => {
-    updateComments();
   };
 
   let renderSubmit = () => {
@@ -80,13 +100,6 @@ window.addEventListener("load", async _ => {
     }
   });
 
-  token.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      updateComments();
-      document.activeElement.blur();
-    }
-  });
-
   update.addEventListener("click", _ => {
     updateComments();
     document.activeElement.blur();
@@ -117,6 +130,7 @@ window.addEventListener("load", async _ => {
     document.activeElement.blur();
   });
 
+  updateToken();
   updateComments();
   document.activeElement.blur();
 });
