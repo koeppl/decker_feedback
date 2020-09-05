@@ -82,30 +82,3 @@ addExport = Text.unlines . map insert . Text.lines
     insert
       line = if "var " `Text.isPrefixOf` line then "export " <> line else line
 
-mock :: ReaderT SqlBackend IO (Key Comment)
-mock
-  = do now <- liftIO getCurrentTime
-       p1 <- insert $ Person "person1"
-       p2 <- insert $ Person "person2"
-       insert
-         $ Comment
-           "What is the purpose of this stuff? Nobody ever needs to know this."
-           "cgg"
-           "intro-slide"
-           (Just p1)
-           now
-       insert
-         $ Comment
-           "May I go to the bathroom?"
-           "cgg"
-           "intro-slide"
-           (Just p1)
-           now
-       insert $ Comment "Wat?" "cgg" "intro-slide" (Just p2) now
-       insert
-         $ Comment
-           "Fucking hell, this is really anonymous! Keep on swearing."
-           "cgg"
-           "slide-2"
-           Nothing
-           now

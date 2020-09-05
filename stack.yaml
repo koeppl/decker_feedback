@@ -3,4 +3,8 @@ resolver: lts-16.8
 packages:
   - .
 
-extra-deps: []
+extra-deps: 
+  - git: git@github.com:jgm/commonmark-hs.git
+    commit: f9132b7686de276454a5aab14df9cabed817f86e
+    subdirs:
+      - commonmark

@@ -1,6 +1,6 @@
 import "./atomic.js";
 
-export default buildApi;
+export {buildApi};
 
 function buildApi(url) {
   return {

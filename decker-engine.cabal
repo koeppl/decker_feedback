@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3ee893603eb04dfb919df94cf7c521827f14aa8a2fdea89ebf457f296464d2fb
+-- hash: e8fd554788ad576983dc0d32a7a6d06a3ff645886e36b0cf05e9730d0cb51461
 
 name:           decker-engine
 version:        0.1.0.0
@@ -45,6 +45,7 @@ library
     , base >=4.7 && <5
     , blaze-html
     , bytestring
+    , commonmark
     , conduit
     , containers
     , directory
@@ -89,6 +90,7 @@ executable decker-engine
     , base
     , blaze-html
     , bytestring
+    , commonmark
     , conduit
     , containers
     , decker-engine
@@ -134,6 +136,7 @@ test-suite decker-engine-test
     , base
     , blaze-html
     , bytestring
+    , commonmark
     , conduit
     , containers
     , decker-engine

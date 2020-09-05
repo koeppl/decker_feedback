@@ -23,6 +23,7 @@ dependencies:
   - aeson
   - blaze-html
   - bytestring
+  - commonmark
   - conduit
   - containers
   - directory

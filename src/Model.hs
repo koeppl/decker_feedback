@@ -36,6 +36,7 @@ Person json
   deriving Show Eq
 Comment json
   markdown Text
+  html Text Maybe
   deck Text
   slide Text
   author PersonId Maybe

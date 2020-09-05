@@ -1,4 +1,4 @@
-import buildApi from "./decker-util.js";
+import {buildApi} from "./decker-util.js";
 
 let util = buildApi(".");
 
@@ -69,7 +69,7 @@ window.addEventListener("load", async _ => {
     }
     for (let comment of list) {
       let div = document.createElement("div");
-      div.textContent = comment.html;
+      div.innerHTML = comment.html;
       if (comment.delete) {
         let del = document.createElement("button");
         del.textContent = "✖";

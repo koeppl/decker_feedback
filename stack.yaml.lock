@@ -3,7 +3,20 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    subdir: commonmark
+    name: commonmark
+    version: 0.1.0.2
+    git: git@github.com:jgm/commonmark-hs.git
+    pantry-tree:
+      size: 1407
+      sha256: c1dea57a15785a8ab66da93c66a69f59f2c6abf537a67d71bd730755c89fa9d0
+    commit: f9132b7686de276454a5aab14df9cabed817f86e
+  original:
+    subdir: commonmark
+    git: git@github.com:jgm/commonmark-hs.git
+    commit: f9132b7686de276454a5aab14df9cabed817f86e
 snapshots:
 - completed:
     size: 532379

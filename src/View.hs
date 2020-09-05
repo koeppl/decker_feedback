@@ -15,7 +15,8 @@ import qualified Model as Model
 import Relude
 
 data Comment
-  = Comment { commentHtml :: Text
+  = Comment { commentMarkdown :: Text
+            , commentHtml :: Text
             , commentCreated :: UTCTime
             , commentDelete :: Maybe (Model.Key Model.Comment)
             }
@@ -31,5 +32,4 @@ data CommentData = CommentData { commentDataHtml :: Text }
 $( deriveJSON
   defaultOptions { fieldLabelModifier = drop 11 . map toLower }
   ''CommentData)
-
 

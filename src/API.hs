@@ -1,9 +1,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
 module API where
+
+import Commonmark
 
 import Config
 
@@ -13,6 +16,7 @@ import Data.Maybe
 import Data.Proxy
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import qualified Data.Text.Lazy.Builder as Text
 import Data.Time ( UTCTime )
 import Data.Time.Clock
 
@@ -139,7 +143,10 @@ getBySlideComments did sid
            [ Desc CommentCreated ]
        return $ map toView list
   where
-    toView c = View.Comment (commentMarkdown c) (commentCreated c) Nothing
+    html c = fromMaybe (commentMarkdown c) (commentHtml c)
+
+    toView c
+      = View.Comment (commentMarkdown c) (html c) (commentCreated c) Nothing
 
 getByAuthorComments :: Text -> Handler [ Comment ]
 getByAuthorComments token
@@ -159,14 +166,24 @@ getBySlideAuthorComments did sid token
          [ Desc CommentCreated ]
        return $ map (toView author) list
   where
+    html c = fromMaybe (commentMarkdown c) (commentHtml c)
+
     toView a e
       = let c = entityVal e
         in View.Comment
              (commentMarkdown c)
+             (html c)
              (commentCreated c)
              (if isJust a && commentAuthor c == a
                  then Just (entityKey e)
                  else Nothing)
+
+compileMarkdown :: Text -> Maybe Text
+compileMarkdown markdown
+  = let escaped = toStrict $ Text.toLazyText $ escapeHtml markdown
+    in case commonmark "stdin" escaped of
+         Left _ -> Just $ "<p>" <> escaped <> "</p>"
+         Right (html :: Html ()) -> Just $ toStrict $ renderHtml html
 
 postComment :: Text -> Text -> Text -> View.CommentData -> Handler ()
 postComment did sid token cdata
@@ -176,24 +193,18 @@ postComment did sid token cdata
          $ do when (Text.null did || Text.null sid) $ fail "Fucking idiot."
               person
                 <- fmap entityKey <$> selectFirst [ PersonToken ==. token ] []
-              case person of
-                Just key -> do insert
-                                 $ Comment
-                                   (View.commentDataHtml cdata)
-                                   did
-                                   sid
-                                   person
-                                   now
-                               return ()
-                Nothing -> do key <- insert $ Person token
-                              insert
-                                $ Comment
-                                  (View.commentDataHtml cdata)
-                                  did
-                                  sid
-                                  (Just key)
-                                  now
-                              return ()
+              key <- case person of
+                Just key -> return key
+                Nothing -> insert $ Person token
+              insert
+                $ Comment
+                  (View.commentDataHtml cdata)
+                  (compileMarkdown (View.commentDataHtml cdata))
+                  did
+                  sid
+                  (Just key)
+                  now
+              return ()
 
 postAnonymousComment :: Text -> Text -> View.CommentData -> Handler ()
 postAnonymousComment did sid cdata
@@ -201,7 +212,14 @@ postAnonymousComment did sid cdata
   $ do now <- getCurrentTime
        runSqlite "db/engine.db"
          $ do when (Text.null did || Text.null sid) $ fail "Fucking idiot."
-              insert $ Comment (View.commentDataHtml cdata) did sid Nothing now
+              insert
+                $ Comment
+                  (View.commentDataHtml cdata)
+                  (compileMarkdown (View.commentDataHtml cdata))
+                  did
+                  sid
+                  Nothing
+                  now
               return ()
 
 deleteComment :: Key Comment -> Text -> Handler ()
