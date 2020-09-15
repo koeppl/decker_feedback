@@ -46,7 +46,7 @@ corsPolicy :: Maybe ([Origin], Bool) -> CorsResourcePolicy
 corsPolicy origins =
   CorsResourcePolicy
     { corsOrigins = origins,
-      corsMethods = ["GET", "HEAD", "POST", "DELETE"],
+      corsMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"],
       corsRequestHeaders = ["Authorization", "Content-Type"],
       corsExposedHeaders = Just ["Content-Type"],
       corsMaxAge = Nothing,
@@ -77,11 +77,3 @@ cryOut req err = do
   print req
   print err
   print ""
-
-addExport :: Text -> Text
-addExport = Text.unlines . map insert . Text.lines
-  where
-    insert line =
-      if "var " `Text.isPrefixOf` line
-        then "export " <> line
-        else line
