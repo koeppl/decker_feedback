@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e8fd554788ad576983dc0d32a7a6d06a3ff645886e36b0cf05e9730d0cb51461
+-- hash: ea6b947c0ca95a2cfe8974b696fc2b045ca3ac5a4447cfaeb7261910e9089cf1
 
 name:           decker-engine
 version:        0.1.0.0
@@ -34,7 +34,9 @@ library
       Lib
       Mock
       Model
+      Query
       Token
+      Uri
       View
   other-modules:
       Paths_decker_engine
@@ -58,6 +60,7 @@ library
     , http-types
     , monad-logger
     , mtl
+    , network-uri
     , persistent
     , persistent-sqlite
     , persistent-template
@@ -104,6 +107,7 @@ executable decker-engine
     , http-types
     , monad-logger
     , mtl
+    , network-uri
     , persistent
     , persistent-sqlite
     , persistent-template
@@ -153,6 +157,7 @@ test-suite decker-engine-test
     , http-types
     , monad-logger
     , mtl
+    , network-uri
     , persistent
     , persistent-sqlite
     , persistent-template

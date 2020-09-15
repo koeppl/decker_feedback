@@ -1,4 +1,4 @@
-import {buildApi} from "./decker-util.js";
+import { buildApi } from "./decker-util.js";
 
 let util = buildApi(".");
 
@@ -24,14 +24,21 @@ window.addEventListener("load", async _ => {
   }
 
   let getContext = () => {
+    let url = new URL(window.location);
+    let hash = url.hash;
+    url.hash = "";
+    url.query = "";
+    url.username = "";
+    url.password = "";
+    deckid.value = url.href;
     if (serverToken.authorized) {
       return {
-        deck: deckid.value,
+        deck: url.href,
         slide: slideid.value,
         token: serverToken.authorized
       };
     } else {
-      return { deck: deckid.value, slide: slideid.value, token: token.value };
+      return { deck: url.href, slide: slideid.value, token: token.value };
     }
   };
 

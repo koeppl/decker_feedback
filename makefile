@@ -31,3 +31,17 @@ install-service: install
 	sudo systemctl enable decker-engine
 	sudo systemctl start decker-engine
 
+common := --referer http://localhost:8081 --header "Content-Type: application/json" --header "Accept: application/json" 
+heise := 
+
+curl:
+	curl ${common} -X GET http://localhost:8081/token
+	@echo ""
+	curl ${common} -X PUT -d '{"deck": "http://heise.de", "slide": "hurgel", "token": "lorgel"}' http://localhost:8081/comments
+	@echo ""
+	curl ${common} -X POST -d '{"markdown": "*fuck*", "deck": "http://heise.de", "slide": "lorgel"}' http://localhost:8081/comments
+	@echo ""
+	curl ${common} -X DELETE -d '{"key": 17, "token": "lorgel"}' http://localhost:8081/comments
+	@echo ""
+
+.PHONY: curl install-service open install build run-local run-local-cors
