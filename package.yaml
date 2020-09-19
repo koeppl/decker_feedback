@@ -41,6 +41,7 @@ dependencies:
   - persistent-sqlite
   - persistent-template
   - relude
+  - SHA
   - servant
   - servant-docs
   - servant-js
@@ -54,23 +55,26 @@ dependencies:
   - warp
   - pureMD5
   - random
+  - yaml
+  - stm
+  - resource-pool
 
 library:
   source-dirs: src
 
 executables:
-  #decker-daemon:
-  #main: Daemon
-  #source-dirs: app
-  #ghc-options:
-  #- -threaded
-  #- -rtsopts
-  #- -with-rtsopts=-N
-  #dependencies:
-  #- base
-  #- decker-engine
   decker-engine:
     main: Main
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - base
+      - decker-engine
+  engine-user:
+    main: EngineUser
     source-dirs: app
     ghc-options:
       - -threaded

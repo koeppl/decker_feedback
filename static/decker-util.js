@@ -17,7 +17,6 @@ function buildApi(url) {
         slide: slide,
         token: token
       };
-      console.log(data);
       return atomic(url + "/comments", {
         /* Need to use put, because server does not accept data in request body
          * of GET. */
@@ -39,7 +38,6 @@ function buildApi(url) {
         token: token,
         markdown: markdown
       };
-      console.log(data);
       return atomic(url + "/comments", {
         method: "POST",
         headers: {
@@ -56,7 +54,6 @@ function buildApi(url) {
         key: key,
         token: token
       };
-      console.log(data);
       return atomic(url + "/comments", {
         method: "DELETE",
         headers: {

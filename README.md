@@ -10,3 +10,11 @@
     persistent-sqlite](https://hackage.haskell.org/package/persistent-sqlite)
 -   [haskell-servant /
     example-servant-persistent](https://github.com/haskell-servant/example-servant-persistent)
+
+## Authentication
+
+|                    | public server | beuth ldap server |
+|--------------------|---------------|-------------------|
+| token              | random token  | auth token        |
+| login (basic auth) | admin token   | ---               |
+|                    |               |                   |

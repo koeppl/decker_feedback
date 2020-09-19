@@ -6,6 +6,7 @@
 
 module API where
 
+import Admin
 import Commonmark
 import Config
 import Control.Monad.Logger
@@ -71,14 +72,15 @@ jsAPI = Proxy
 -- docs = toText . markdown $ docsWithIntros [ intro ] deckerAPI
 -- saveDocs :: FilePath -> IO ()
 -- saveDocs path = Text.writeFile path API.docs
-type DeckerAPI = CommentAPI :<|> AuthorAPI :<|> Raw
+type DeckerAPI = AuthAPI :<|> CommentAPI :<|> AuthorAPI :<|> Raw
 
 deckerAPI :: Proxy DeckerAPI
 deckerAPI = Proxy
 
+
 deckerServer :: Server DeckerAPI
 deckerServer =
-  commentServer :<|> authorServer :<|> serveDirectoryWebApp "static"
+  authServer :<|> commentServer :<|> authorServer :<|> serveDirectoryWebApp "static"
 
 -- | Retrieves the selected list of comments from the database. If the slide id
 -- fragment is specified, only comments for that slide are returned, otherwise
@@ -163,9 +165,10 @@ deleteComment ident =
     runSqlite "db/engine.db" $
       do
         author <- case idToken ident of
-          Just
-            token -> fmap entityKey <$> selectFirst [PersonToken ==. token] []
-          Nothing -> return Nothing
+          Just token ->
+            fmap entityKey <$> selectFirst [PersonToken ==. token] []
+          Nothing ->
+            return Nothing
         comment <- get (idKey ident)
         if ( isJust author
                && isJust comment

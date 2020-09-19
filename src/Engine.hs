@@ -4,6 +4,7 @@
 module Engine where
 
 import API
+import Admin
 import Control.Monad.Logger
 import Data.Aeson
 import qualified Data.Text as Text
@@ -20,6 +21,7 @@ import Relude hiding (group)
 import Servant
 import Servant.JS
 import Servant.JS.Vanilla
+import State
 import System.Directory
 import System.Environment
 import System.FilePath
@@ -28,11 +30,13 @@ import System.FilePath
 -- mode is meant to be used behind an Apache proxy server that handles the
 -- generation of CORS headers. Otherwise, the list of CORS origin URLs is
 -- parsed and passed to the CORS middleware (with credentials enabled).
-app :: Maybe CorsResourcePolicy -> Application
-app policy =
+app :: Maybe CorsResourcePolicy -> EngineState -> Application
+app policy authStore =
   case policy of
-    Just policy -> corsWare policy $ serve deckerAPI deckerServer
-    Nothing -> serve deckerAPI deckerServer
+    Just policy -> corsWare policy $ serveWithContext deckerAPI context deckerServer
+    Nothing -> serveWithContext deckerAPI context deckerServer
+  where
+    context = checkBasicAuth authStore :. EmptyContext
 
 -- | Transform a comma separated string of origin URLs into a list for the cors
 -- middleware.
@@ -70,7 +74,8 @@ daemon = do
     else putStrLn "No CORS"
   let settings = setPort 8081 $ setOnException cryOut $ defaultSettings
   -- runSettings settings (app policy)
-  run 8081 (app policy)
+  authStore <- makeEngineState
+  run 8081 (app policy authStore)
 
 cryOut :: Maybe Request -> SomeException -> IO ()
 cryOut req err = do

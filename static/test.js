@@ -25,7 +25,6 @@ window.addEventListener("load", async _ => {
 
   let getContext = () => {
     let url = new URL(window.location);
-    let hash = url.hash;
     url.hash = "";
     url.query = "";
     url.username = "";

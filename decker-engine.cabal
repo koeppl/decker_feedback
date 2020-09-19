@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ea6b947c0ca95a2cfe8974b696fc2b045ca3ac5a4447cfaeb7261910e9089cf1
+-- hash: 9fdcdf4e89c78318141aa0c2a55544855e91519b056b37094294542574bdcf45
 
 name:           decker-engine
 version:        0.1.0.0
@@ -26,6 +26,7 @@ source-repository head
 
 library
   exposed-modules:
+      Admin
       API
       Config
       Docs
@@ -35,6 +36,7 @@ library
       Mock
       Model
       Query
+      State
       Token
       Uri
       View
@@ -43,7 +45,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      aeson
+      SHA
+    , aeson
     , base >=4.7 && <5
     , blaze-html
     , bytestring
@@ -67,10 +70,12 @@ library
     , pureMD5
     , random
     , relude
+    , resource-pool
     , servant
     , servant-docs
     , servant-js
     , servant-server
+    , stm
     , text
     , time
     , transformers
@@ -78,18 +83,21 @@ library
     , wai-cors
     , wai-extra
     , warp
+    , yaml
   default-language: Haskell2010
 
 executable decker-engine
   main-is: Main.hs
   other-modules:
       Daemon
+      EngineUser
       Paths_decker_engine
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N -main-is Main
   build-depends:
-      aeson
+      SHA
+    , aeson
     , base
     , blaze-html
     , bytestring
@@ -114,10 +122,12 @@ executable decker-engine
     , pureMD5
     , random
     , relude
+    , resource-pool
     , servant
     , servant-docs
     , servant-js
     , servant-server
+    , stm
     , text
     , time
     , transformers
@@ -125,6 +135,59 @@ executable decker-engine
     , wai-cors
     , wai-extra
     , warp
+    , yaml
+  default-language: Haskell2010
+
+executable engine-user
+  main-is: EngineUser.hs
+  other-modules:
+      Daemon
+      Main
+      Paths_decker_engine
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -main-is EngineUser
+  build-depends:
+      SHA
+    , aeson
+    , base
+    , blaze-html
+    , bytestring
+    , commonmark
+    , conduit
+    , containers
+    , decker-engine
+    , directory
+    , either
+    , fast-logger
+    , filepath
+    , hdaemonize
+    , http-api-data
+    , http-media
+    , http-types
+    , monad-logger
+    , mtl
+    , network-uri
+    , persistent
+    , persistent-sqlite
+    , persistent-template
+    , pureMD5
+    , random
+    , relude
+    , resource-pool
+    , servant
+    , servant-docs
+    , servant-js
+    , servant-server
+    , stm
+    , text
+    , time
+    , transformers
+    , wai
+    , wai-cors
+    , wai-extra
+    , warp
+    , yaml
   default-language: Haskell2010
 
 test-suite decker-engine-test
@@ -136,7 +199,8 @@ test-suite decker-engine-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      SHA
+    , aeson
     , base
     , blaze-html
     , bytestring
@@ -164,10 +228,12 @@ test-suite decker-engine-test
     , pureMD5
     , random
     , relude
+    , resource-pool
     , servant
     , servant-docs
     , servant-js
     , servant-server
+    , stm
     , text
     , time
     , transformers
@@ -175,4 +241,5 @@ test-suite decker-engine-test
     , wai-cors
     , wai-extra
     , warp
+    , yaml
   default-language: Haskell2010
