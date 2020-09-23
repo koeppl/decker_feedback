@@ -1,8 +1,8 @@
 
 module Main where
 
-import Engine
+import EngineScotty
 
 main :: IO ()
-main = daemon
+main = engine
 

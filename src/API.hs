@@ -8,7 +8,6 @@ module API where
 
 import Admin
 import Commonmark
-import Config
 import Control.Monad.Logger
 import Data.Maybe
 import Data.Proxy

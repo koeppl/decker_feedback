@@ -17,7 +17,6 @@
 
 module Model where
 
-import Config
 
 import Control.Monad.Reader ( MonadIO, MonadReader, asks, liftIO )
 
@@ -51,10 +50,3 @@ Comment json
   deriving Show Eq
 |]
 
-doMigrations :: SqlPersistT IO ()
-doMigrations = runMigration migrateAll
-
-runDb :: ( MonadReader Config m, MonadIO m ) => SqlPersistT IO b -> m b
-runDb query
-  = do pool <- asks configPool
-       liftIO $ runSqlPool query pool

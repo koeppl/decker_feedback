@@ -13,6 +13,7 @@ import Data.Char
 import Data.Digest.Pure.SHA
 import Data.Pool
 import Data.Yaml
+import Database.Persist.Sql (ConnectionPool)
 import qualified Database.Persist.Sqlite as Sqlite
 import Relude
 import Relude.Extra.Map
@@ -44,6 +45,12 @@ data EngineState = EngineState
     stateSessions :: TVar AdminSessions
   }
 
+data Config = Config
+  { userDB :: UserDB,
+    adminSessions :: TVar AdminSessions,
+    dbPool :: ConnectionPool
+  }
+
 loadUserDB :: IO UserDB
 loadUserDB = do
   let fileName = "db/users.yaml"
@@ -61,8 +68,18 @@ makeSessionToken store user = do
   atomically $ modifyTVar' (stateSessions store) (insert token user)
   return token
 
+makeSessionToken' :: TVar AdminSessions -> User -> IO Text
+makeSessionToken' sessions user = do
+  token <- randomToken
+  atomically $ modifyTVar' sessions (insert token user)
+  return token
+
 isAdminUser :: EngineState -> Text -> IO (Maybe User)
 isAdminUser store token = undefined
+
+isAdminUser' :: TVar AdminSessions -> Text -> IO (Maybe User)
+isAdminUser' sessions token =
+  lookup token <$> (atomically $ readTVar sessions)
 
 hashPassword :: Text -> Text -> Text
 hashPassword password salt =
@@ -73,4 +90,3 @@ authenticateUser login password (UserDB db) =
   case lookup login db of
     Just (User _ hash salt _) -> hash == hashPassword password salt
     Nothing -> False
-

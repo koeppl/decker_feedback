@@ -20,14 +20,15 @@ description: Please see the README on GitHub at <https://github.com/monofon/deck
 
 dependencies:
   - base >= 4.7 && < 5
+  - SHA
   - aeson
+  - base64-bytestring
   - blaze-html
   - bytestring
   - commonmark
   - conduit
   - containers
   - directory
-  - network-uri
   - either
   - fast-logger
   - filepath
@@ -37,27 +38,30 @@ dependencies:
   - http-types
   - monad-logger
   - mtl
+  - network-uri
   - persistent
   - persistent-sqlite
   - persistent-template
+  - pureMD5
+  - random
   - relude
-  - SHA
+  - resource-pool
+  - scotty
   - servant
   - servant-docs
   - servant-js
   - servant-server
+  - stm
   - text
   - time
   - transformers
   - wai
-  - wai-extra
   - wai-cors
+  - wai-extra
+  - wai-extra
+  - wai-middleware-static
   - warp
-  - pureMD5
-  - random
   - yaml
-  - stm
-  - resource-pool
 
 library:
   source-dirs: src

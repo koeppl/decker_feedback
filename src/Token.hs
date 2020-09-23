@@ -40,10 +40,10 @@ calcToken authorization =
   do
     rnd <- hash9 . show <$> (getStdRandom random :: IO Word64)
     case authorization of
-      Just credentials -> return $ Token rnd (Just $ hash9 credentials)
-      Nothing -> return $ Token rnd Nothing
+      Just credentials -> return $ Token rnd (Just $ hash9 credentials) Nothing
+      Nothing -> return $ Token rnd Nothing Nothing
 
-data Token = Token {tokenRandom :: Text, tokenAuthorized :: Maybe Text}
+data Token = Token {tokenRandom :: Text, tokenAuthorized :: Maybe Text, tokenAdmin :: Maybe Text}
   deriving (Show)
 
 $( deriveJSON
