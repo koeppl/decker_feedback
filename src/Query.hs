@@ -16,6 +16,16 @@ import Network.URI
 
 import Relude
 
+data Credentials
+  = Credentials { credLogin :: Text
+                , credPassword ::  Text
+                }
+  deriving ( Show )
+
+$( deriveJSON
+  defaultOptions { fieldLabelModifier = drop 4 . map toLower }
+  ''Credentials)
+
 data CommentData
   = CommentData { commentMarkdown :: Text
                 , commentToken :: Maybe Text
