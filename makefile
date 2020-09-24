@@ -26,6 +26,7 @@ install-service: install
 	sudo cp ~/.local/bin/decker-engine /usr/local/bin
 	sudo cp ~/.local/bin/decker-daemon /usr/local/bin
 	sudo cp -r static/* /var/local/decker/static
+	sudo cp db/users.yaml /var/local/decker/db
 	sudo chown -R decker:decker /var/local/decker
 	sudo systemctl daemon-reload
 	sudo systemctl enable decker-engine
