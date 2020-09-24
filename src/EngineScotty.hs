@@ -30,7 +30,7 @@ import Network.Wai.Middleware.RequestLogger
 import Network.Wai.Middleware.Static
 import Query
 import Relude
-import Relude.Extra.Map (lookup)
+import Relude.Extra.Map as Map (insert, lookup)
 import State
 import Token
 import View
@@ -94,9 +94,51 @@ app cors auth = do
 getToken' :: ActionT Error EngineM ()
 getToken' = do
   value <- fmap toStrict <$> header "Authorization"
-  token <- liftIO $ calcToken value
-  logI $ "" <> show token
-  json token
+  case value of
+    Just creds -> do
+      -- basicly authorized
+      admin <- adminUser $ authUser value
+      case admin of
+        Just user -> do
+          -- authorized admin
+          mkAdminToken creds user >>= json
+        Nothing -> do
+          -- just a user
+          mkUserToken creds >>= json
+    Nothing -> do
+      -- not authorized
+      mkRandomToken >>= json
+
+mkRandomToken :: ActionT Error EngineM Token
+mkRandomToken = do
+  rnd <- liftIO randomToken
+  return $ Token rnd Nothing Nothing
+
+mkUserToken :: Text -> ActionT Error EngineM Token
+mkUserToken creds = do
+  rnd <- liftIO randomToken
+  let usr = Just $ hash9 creds
+  return $ Token rnd usr Nothing
+
+mkAdminToken :: Text -> User -> ActionT Error EngineM Token
+mkAdminToken creds user = do
+  rnd <- liftIO randomToken
+  let usr = Just $ hash9 creds
+  adm <- liftIO randomToken
+  sessions <- asks adminSessions
+  liftIO $ atomically $ modifyTVar' sessions (Map.insert adm user)
+  return $ Token rnd usr (Just adm)
+
+adminUser :: Maybe Text -> ActionT Error EngineM (Maybe User)
+adminUser login = do
+  db <- users <$> asks userDB
+  return $ login >>= (flip lookup) db
+
+isAdminUser'' :: Maybe Text -> ActionT Error EngineM (Maybe User)
+isAdminUser'' (Just token) = do
+  sessionStore <- asks adminSessions
+  liftIO $ isAdminUser' sessionStore token
+isAdminUser'' Nothing = return Nothing
 
 getComments :: ActionT Error EngineM ()
 getComments = do
@@ -122,16 +164,17 @@ getComments = do
         selectList
           [CommentDeck ==. selectDeck selector]
           [Desc CommentCreated]
-  json $ map (toView author) list
+  admin <- isAdminUser'' (selectToken selector)
+  json $ map (toView author admin) list
   where
-    toView a e =
-      let c = entityVal e
+    toView author admin entity =
+      let c = entityVal entity
        in View.Comment
             (Model.commentMarkdown c)
             (Model.commentHtml c)
             (Model.commentCreated c)
-            ( if isJust a && commentAuthor c == a
-                then Just (entityKey e)
+            ( if isJust author && commentAuthor c == author || isJust admin
+                then Just (entityKey entity)
                 else Nothing
             )
 
@@ -155,11 +198,11 @@ postComment = do
           <$> runDb (selectFirst [PersonToken ==. token] [])
       case key of
         Just key -> return $ Just key
-        Nothing -> Just <$> runDb (insert (Person token))
+        Nothing -> Just <$> runDb (Sqlite.insert (Person token))
     Nothing -> return Nothing
   key <-
     runDb $
-      insert $
+      Sqlite.insert $
         Model.Comment
           (Query.commentMarkdown cdata)
           (compileMarkdown (Query.commentMarkdown cdata))

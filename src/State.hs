@@ -81,6 +81,7 @@ isAdminUser' :: TVar AdminSessions -> Text -> IO (Maybe User)
 isAdminUser' sessions token =
   lookup token <$> (atomically $ readTVar sessions)
 
+
 hashPassword :: Text -> Text -> Text
 hashPassword password salt =
   toText $ showDigest $ sha256 $ encodeUtf8 (password <> salt)
