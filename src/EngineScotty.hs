@@ -83,13 +83,13 @@ app :: Middleware -> Middleware -> ScottyT Error EngineM ()
 app cors auth = do
   middleware logStdoutDev
   middleware cors
-  middleware auth
+  -- middleware auth
   middleware $ staticPolicy (addBase "static")
   S.get "/token" getToken'
   S.put "/comments" getComments
   S.delete "/comments" deleteComment
   S.post "/comments" postComment
-  S.get "/login" loginAdmin
+  S.put "/login" loginAdmin
 
 getToken' :: ActionT Error EngineM ()
 getToken' = do
@@ -239,22 +239,16 @@ deleteComment = do
         Nothing -> status notFound404
     Nothing -> status forbidden403
 
--- | Creates and returns an admin token for the already authorized request. The
--- user name is taken from the Authorization header value.
+-- | Creates and returns an admin token for the provided credentials.
 loginAdmin :: ActionT Error EngineM ()
 loginAdmin = do
+  creds <- jsonData
   sessions <- asks adminSessions
   udb <- asks userDB
-  value <- fmap toStrict <$> header "Authorization"
-  let username = authUser value
-  let user = username >>= (flip lookup) (users udb)
-  case user of
-    Just username -> do
-      token <- liftIO $ calcToken value
-      admin <- liftIO $ makeSessionToken' sessions username
-      let adminToken = token {tokenAdmin = Just admin}
-      logI $ show adminToken
-      json adminToken
+  case authenticateUser' (credLogin creds) (credPassword creds) udb of
+    Just user -> do
+      token <- liftIO $ makeSessionToken' sessions user
+      json $ (fromList [("admin", token)] :: Map Text Text)
     Nothing -> status forbidden403
 
 logI = lift . logInfoN

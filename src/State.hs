@@ -81,7 +81,6 @@ isAdminUser' :: TVar AdminSessions -> Text -> IO (Maybe User)
 isAdminUser' sessions token =
   lookup token <$> (atomically $ readTVar sessions)
 
-
 hashPassword :: Text -> Text -> Text
 hashPassword password salt =
   toText $ showDigest $ sha256 $ encodeUtf8 (password <> salt)
@@ -91,3 +90,10 @@ authenticateUser login password (UserDB db) =
   case lookup login db of
     Just (User _ hash salt _) -> hash == hashPassword password salt
     Nothing -> False
+
+authenticateUser' :: Text -> Text -> UserDB -> Maybe User
+authenticateUser' login password (UserDB db) =
+  case lookup login db of
+    Just user@(User _ hash salt _)
+      | hash == hashPassword password salt -> return user
+    Nothing -> Nothing

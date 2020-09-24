@@ -1,31 +1,36 @@
 export { buildApi };
 
-function buildApi(url) {
+function buildApi(base) {
+  let cors = window.location.origin !== new URL(base).origin;
+
+  console.log("buildApi: cors = " + cors);
+
   return {
     getToken: async () => {
-      return fetch(url + "/token", {
+      return fetch(base + "/token", {
         method: "GET",
-        // mode: "cors",
-        credentials: "include",
+        mode: cors ? "cors" : "same-origin",
+        credentials: cors ? "omit" : "include",
         cache: "no-store"
       }).then(response => response.json());
     },
 
-    getLogin: async () => {
-      return fetch(url + "/login", {
-        method: "GET",
-        // mode: "cors",
-        credentials: "include",
-        cache: "no-store"
+    getLogin: async (credentials) => {
+      return fetch(base + "/login", {
+        method: "PUT",
+        mode: cors ? "cors" : "same-origin",
+        cache: "no-store",
+        body: JSON.stringify(credentials)
       }).then(response => response.json());
     },
 
     getComments: async (deck, slide, token) => {
       let data = { deck: deck, slide: slide, token: token };
-      return fetch(url + "/comments", {
+      return fetch(base + "/comments", {
         /* Need to use put, because server does not accept data in
          * request body of GET. */
         method: "PUT",
+        mode: cors ? "cors" : "same-origin",
         cache: "no-store",
         body: JSON.stringify(data)
       }).then(response => response.json());
@@ -39,16 +44,18 @@ function buildApi(url) {
         token: token,
         markdown: markdown
       };
-      return fetch(url + "/comments", {
+      return fetch(base + "/comments", {
         method: "POST",
+        mode: cors ? "cors" : "same-origin",
         body: JSON.stringify(data)
       });
     },
 
     deleteComment: (key, token) => {
       let data = { key: key, token: token };
-      return fetch(url + "/comments", {
+      return fetch(base + "/comments", {
         method: "DELETE",
+        mode: cors ? "cors" : "same-origin",
         body: JSON.stringify(data)
       });
     }
