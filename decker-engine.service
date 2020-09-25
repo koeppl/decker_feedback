@@ -13,3 +13,7 @@ RestartSec=1s
 [Install]
 WantedBy=multi-user.target
 
+[Journal]
+Storage=persistent
+SystemKeepFree=30%
+ForwardToSyslog=false
