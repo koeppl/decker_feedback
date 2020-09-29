@@ -3,9 +3,7 @@
 
 module EngineUser where
 
-import Admin
 import Data.Yaml
-import Data.Yaml.TH
 import Relude
 import State
 import System.Environment

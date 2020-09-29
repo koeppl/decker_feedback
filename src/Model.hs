@@ -6,7 +6,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -14,27 +13,17 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Model where
 
-
-import Control.Monad.Reader ( MonadIO, MonadReader, asks, liftIO )
-
-import Data.Text ( Text )
 import Data.Time.Clock
-
-import Database.Persist
 import Database.Persist.Sql
 import Database.Persist.TH
-
-import Network.URI ( URI )
-
 import Relude
 
-import Uri
-
 share
-  [ mkPersist sqlSettings, mkMigrate "migrateAll" ]
+  [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
 Person json
   token Text
@@ -49,4 +38,3 @@ Comment json
   created UTCTime default=CURRENT_TIME
   deriving Show Eq
 |]
-

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3d96a43ddf4773631cf2c7fe62f337ad55d167c9b599cca2ed2d9e57b81a6a7
+-- hash: c8d625c38134fffe65fa2df4f1fd98f9f84c8f8f00c9f8cd859d70323c535207
 
 name:           decker-engine
 version:        0.1.0.0
@@ -27,15 +27,10 @@ source-repository head
 library
   exposed-modules:
       Admin
-      API
       Auth
       Cors
-      Docs
-      Engine
       EngineScotty
       HTML
-      Lib
-      Mock
       Model
       Query
       State
@@ -46,6 +41,7 @@ library
       Paths_decker_engine
   hs-source-dirs:
       src
+  ghc-options: -Wunused-top-binds -Wunused-local-binds -Wincomplete-patterns -fwarn-unused-imports
   build-depends:
       SHA
     , aeson
@@ -98,7 +94,7 @@ executable decker-engine
       Paths_decker_engine
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -main-is Main
+  ghc-options: -Wunused-top-binds -Wunused-local-binds -Wincomplete-patterns -fwarn-unused-imports -threaded -rtsopts -with-rtsopts=-N -main-is Main
   build-depends:
       SHA
     , aeson
@@ -152,7 +148,7 @@ executable engine-user
       Paths_decker_engine
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -main-is EngineUser
+  ghc-options: -Wunused-top-binds -Wunused-local-binds -Wincomplete-patterns -fwarn-unused-imports -threaded -rtsopts -with-rtsopts=-N -main-is EngineUser
   build-depends:
       SHA
     , aeson
@@ -206,7 +202,7 @@ test-suite decker-engine-test
       Paths_decker_engine
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wunused-top-binds -Wunused-local-binds -Wincomplete-patterns -fwarn-unused-imports -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SHA
     , aeson

@@ -9,16 +9,11 @@
 module State where
 
 import Data.Aeson.TH
-import Data.Char
 import Data.Digest.Pure.SHA
-import Data.Pool
 import Data.Yaml
 import Database.Persist.Sql (ConnectionPool)
-import qualified Database.Persist.Sqlite as Sqlite
 import Relude
 import Relude.Extra.Map
-import Servant.API
-import Servant.Server
 import Token
 
 data User = User
@@ -74,9 +69,6 @@ makeSessionToken' sessions user = do
   atomically $ modifyTVar' sessions (insert token user)
   return token
 
-isAdminUser :: EngineState -> Text -> IO (Maybe User)
-isAdminUser store token = undefined
-
 isAdminUser' :: TVar AdminSessions -> Text -> IO (Maybe User)
 isAdminUser' sessions token =
   lookup token <$> (atomically $ readTVar sessions)
@@ -96,4 +88,4 @@ authenticateUser' login password (UserDB db) =
   case lookup login db of
     Just user@(User _ hash salt _)
       | hash == hashPassword password salt -> return user
-    Nothing -> Nothing
+    _ -> Nothing

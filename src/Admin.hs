@@ -8,12 +8,6 @@
 
 module Admin where
 
-import Data.Aeson.TH
-import Data.Char
-import Data.Digest.Pure.SHA
-import Data.Pool
-import Data.Yaml
-import qualified Database.Persist.Sqlite as Sqlite
 import Relude
 import Relude.Extra.Map
 import Servant.API

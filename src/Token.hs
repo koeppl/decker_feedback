@@ -13,9 +13,6 @@ import Data.Digest.Pure.MD5
 import qualified Data.Text as Text
 import Relude hiding (get)
 import Servant
-import Servant.API
-import Servant.Docs
-import Servant.Server
 import System.Random
 
 -- | Tries to generate a hash a token from the authorization header value. If

@@ -66,6 +66,12 @@ dependencies:
 library:
   source-dirs: src
 
+ghc-options:
+  - -Wunused-top-binds
+  - -Wunused-local-binds
+  - -Wincomplete-patterns
+  - -fwarn-unused-imports
+
 executables:
   decker-engine:
     main: Main

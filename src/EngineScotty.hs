@@ -15,8 +15,6 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Control.Monad.Reader.Class
-import Control.Monad.Trans.Class
 import Cors
 import Data.Maybe
 import qualified Data.Text.Internal.Builder as Text
@@ -25,7 +23,6 @@ import Database.Persist.Sqlite as Sqlite
 import Model
 import Network.HTTP.Types.Status
 import Network.Wai
-import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.RequestLogger
 import Network.Wai.Middleware.Static
 import Query
@@ -158,12 +155,12 @@ getComments = do
           [ CommentDeck ==. selectDeck selector,
             CommentSlide ==. slideId
           ]
-          [Desc CommentCreated]
+          [Asc CommentCreated]
     Nothing ->
       runDb $
         selectList
           [CommentDeck ==. selectDeck selector]
-          [Desc CommentCreated]
+          [Asc CommentCreated]
   admin <- isAdminUser'' (selectToken selector)
   json $ map (toView author admin) list
   where
