@@ -87,6 +87,7 @@ app cors auth = do
   S.delete "/comments" deleteComment
   S.post "/comments" postComment
   S.put "/login" loginAdmin
+  S.put "/upvote" upvoteComment
 
 getToken' :: ActionT Error EngineM ()
 getToken' = do
@@ -131,22 +132,36 @@ adminUser login = do
   db <- users <$> asks userDB
   return $ login >>= (flip lookup) db
 
-isAdminUser'' :: Maybe Text -> ActionT Error EngineM (Maybe User)
-isAdminUser'' (Just token) = do
+isAdminUser :: Maybe Text -> ActionT Error EngineM (Maybe User)
+isAdminUser (Just token) = do
   sessionStore <- asks adminSessions
   liftIO $ isAdminUser' sessionStore token
-isAdminUser'' Nothing = return Nothing
+isAdminUser Nothing = return Nothing
+
+type CommentKey = Model.Key Model.Comment
+
+numberOfVotes :: CommentKey -> ActionT Error EngineM Int
+numberOfVotes comment = runDb $ count [VoteComment ==. comment]
+
+didVote :: CommentKey -> Maybe (Entity Person) -> ActionT Error EngineM Bool
+didVote comment voter = case voter of
+  Just voter ->
+    isJust
+      <$> runDb
+        ( selectFirst
+            [VoteComment ==. comment, VoteVoter ==. (entityKey voter)]
+            []
+        )
+  Nothing -> return False
 
 getComments :: ActionT Error EngineM ()
 getComments = do
   logI "GET /comments"
   selector :: Query.Select <- jsonData
   logI $ show selector
-  author :: Maybe (Key Person) <-
+  author :: Maybe (Entity Person) <-
     case selectToken selector of
-      Just token -> do
-        fmap entityKey
-          <$> runDb (selectFirst [PersonToken ==. token] [])
+      Just token -> runDb (selectFirst [PersonToken ==. token] [])
       Nothing -> return Nothing
   list :: [Entity Model.Comment] <- case selectSlide selector of
     Just slideId ->
@@ -161,19 +176,23 @@ getComments = do
         selectList
           [CommentDeck ==. selectDeck selector]
           [Asc CommentCreated]
-  admin <- isAdminUser'' (selectToken selector)
-  json $ map (toView author admin) list
+  admin <- isAdminUser (selectToken selector)
+  mapM (toView author admin) list >>= json
   where
-    toView author admin entity =
+    toView author admin entity = do
       let c = entityVal entity
-       in View.Comment
-            (Model.commentMarkdown c)
-            (Model.commentHtml c)
-            (Model.commentCreated c)
-            ( if isJust author && commentAuthor c == author || isJust admin
-                then Just (entityKey entity)
-                else Nothing
-            )
+      let ckey = entityKey entity
+      votes <- numberOfVotes ckey
+      didVote <- didVote ckey author
+      return $
+        View.Comment
+          (entityKey entity)
+          (personToken . entityVal <$> author)
+          (Model.commentMarkdown c)
+          (Model.commentHtml c)
+          (Model.commentCreated c)
+          votes
+          didVote
 
 compileMarkdown :: Text -> Text
 compileMarkdown markdown =
@@ -208,12 +227,7 @@ postComment = do
           (Query.commentSlide cdata)
           now
   logI $ "insert comment with id: " <> show key
-  json $
-    View.Comment
-      (Query.commentMarkdown cdata)
-      (compileMarkdown (Query.commentMarkdown cdata))
-      now
-      (Just key)
+  status ok200
 
 deleteComment :: ActionT Error EngineM ()
 deleteComment = do
@@ -227,7 +241,7 @@ deleteComment = do
       admin <- liftIO $ isAdminUser' sessions token
       case comment of
         Just comment ->
-          if isJust author && commentAuthor comment == author || isJust admin
+          if isJust author && Model.commentAuthor comment == author || isJust admin
             then do
               logI $ "delete comment with id: " <> show (idKey ident)
               runDb $ Sqlite.delete (idKey ident)
@@ -247,5 +261,27 @@ loginAdmin = do
       token <- liftIO $ makeSessionToken' sessions user
       json $ (fromList [("admin", token)] :: Map Text Text)
     Nothing -> status forbidden403
+
+upvoteComment :: ActionT Error EngineM ()
+upvoteComment = do
+  vote <- jsonData
+  let commentId = Query.voteComment vote
+      voterToken = Query.voteVoter vote
+      up = Query.voteUp vote
+  comment <- fmap (Entity commentId) <$> runDb (Sqlite.get commentId)
+  voter <- runDb (Sqlite.selectFirst [PersonToken ==. voterToken] [])
+  did <- didVote commentId voter
+  upVote up comment voter did
+  where
+    upVote True (Just comment) (Just voter) False = do
+      runDb $ Sqlite.insert (Model.Vote (entityKey comment) (entityKey voter))
+      status ok200
+    upVote False (Just comment) (Just voter) True = do
+      runDb $
+        Sqlite.deleteWhere
+          [VoteComment ==. (entityKey comment), VoteVoter ==. (entityKey voter)]
+      status ok200
+    upVote _ _ _ _ = do
+      status notFound404
 
 logI = lift . logInfoN

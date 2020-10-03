@@ -15,10 +15,13 @@ import qualified Model as Model
 import Relude
 
 data Comment
-  = Comment { commentMarkdown :: Text
+  = Comment { commentId :: Model.Key Model.Comment 
+            , commentAuthor :: Maybe Text
+            , commentMarkdown :: Text
             , commentHtml :: Text
             , commentCreated :: UTCTime
-            , commentDelete :: Maybe (Model.Key Model.Comment)
+            , commentVotes :: Int
+            , commentDidVote :: Bool
             }
   deriving ( Show )
 

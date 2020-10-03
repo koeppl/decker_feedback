@@ -48,7 +48,29 @@ $( deriveJSON
      ''Select
  )
 
-data CommentId = CommentId {idKey :: Key Model.Comment, idToken :: Maybe Text}
+data CommentId = CommentId
+  { idKey :: Key Model.Comment,
+    idToken :: Maybe Text
+  }
   deriving (Show)
 
-$(deriveJSON defaultOptions {fieldLabelModifier = drop 2 . map toLower} ''CommentId)
+$( deriveJSON
+     defaultOptions
+       { fieldLabelModifier = drop 2 . map toLower
+       }
+     ''CommentId
+ )
+
+data Vote = Vote
+  { voteComment :: Key Model.Comment,
+    voteVoter :: Text,
+    voteUp :: Bool
+  }
+  deriving (Show)
+
+$( deriveJSON
+     defaultOptions
+       { fieldLabelModifier = drop 2 . map toLower
+       }
+     ''Vote
+ )

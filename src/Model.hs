@@ -29,6 +29,9 @@ Person json
   token Text
   UniquePersonToken token
   deriving Show Eq
+Vote 
+  comment CommentId
+  voter PersonId
 Comment json
   markdown Text
   html Text
