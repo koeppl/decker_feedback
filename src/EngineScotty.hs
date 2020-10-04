@@ -143,16 +143,14 @@ type CommentKey = Model.Key Model.Comment
 numberOfVotes :: CommentKey -> ActionT Error EngineM Int
 numberOfVotes comment = runDb $ count [VoteComment ==. comment]
 
-didVote :: CommentKey -> Maybe (Entity Person) -> ActionT Error EngineM Bool
-didVote comment voter = case voter of
-  Just voter ->
-    isJust
-      <$> runDb
-        ( selectFirst
-            [VoteComment ==. comment, VoteVoter ==. (entityKey voter)]
-            []
-        )
-  Nothing -> return False
+didPersonVote :: CommentKey -> Key Person -> ActionT Error EngineM Bool
+didPersonVote comment voterKey =
+  isJust
+    <$> runDb
+      ( selectFirst
+          [VoteComment ==. comment, VoteVoter ==. voterKey]
+          []
+      )
 
 getComments :: ActionT Error EngineM ()
 getComments = do
@@ -177,14 +175,16 @@ getComments = do
           [CommentDeck ==. selectDeck selector]
           [Asc CommentCreated]
   admin <- isAdminUser (selectToken selector)
-  comments <- mapM (toView user admin) list 
+  comments <- mapM (toView (entityKey <$> user) admin) list
   json $ reverse $ sortOn commentVotes comments
   where
     toView user admin entity = do
       let c = entityVal entity
       let ckey = entityKey entity
       votes <- numberOfVotes ckey
-      didVote <- didVote ckey user
+      didVote <- case user of
+        Just key -> didPersonVote ckey key
+        Nothing -> return False
       author <-
         case Model.commentAuthor c of
           Just authorId -> runDb $ Sqlite.get authorId
@@ -205,6 +205,18 @@ compileMarkdown markdown =
    in case commonmark "stdin" escaped of
         Left _ -> "<p>" <> escaped <> "</p>"
         Right (html :: Html ()) -> toStrict $ renderHtml html
+
+type Handler = ActionT Error EngineM
+
+getOrCreatePerson :: Text -> Handler (Entity Person)
+getOrCreatePerson token = do
+  person <- runDb (selectFirst [PersonToken ==. token] [])
+  case person of
+    Just person -> return person
+    Nothing -> do
+      key <- runDb (Sqlite.insert (Person token))
+      person <- fromJust <$> runDb (Sqlite.get key)
+      return $ Entity key person
 
 postComment :: ActionT Error EngineM ()
 postComment = do
@@ -248,6 +260,7 @@ deleteComment = do
           if isJust author && Model.commentAuthor comment == author || isJust admin
             then do
               logI $ "delete comment with id: " <> show (idKey ident)
+              runDb $ Sqlite.deleteWhere [VoteComment ==. idKey ident]
               runDb $ Sqlite.delete (idKey ident)
               status noContent204
             else status forbidden403
@@ -272,17 +285,21 @@ upvoteComment = do
   let commentId = Query.voteComment vote
       voterToken = Query.voteVoter vote
   comment <- fmap (Entity commentId) <$> runDb (Sqlite.get commentId)
-  voter <- runDb (Sqlite.selectFirst [PersonToken ==. voterToken] [])
-  did <- didVote commentId voter
-  upVote comment voter did
+  voterKey <- do
+    key <- fmap entityKey <$> runDb (Sqlite.selectFirst [PersonToken ==. voterToken] [])
+    case key of
+      Just key -> return key
+      Nothing -> runDb $ Sqlite.insert $ Person voterToken
+  did <- didPersonVote commentId voterKey
+  upVote comment voterKey did
   where
-    upVote (Just comment) (Just voter) False = do
-      runDb $ Sqlite.insert (Model.Vote (entityKey comment) (entityKey voter))
+    upVote (Just comment) voterKey False = do
+      runDb $ Sqlite.insert (Model.Vote (entityKey comment) voterKey)
       status ok200
-    upVote (Just comment) (Just voter) True = do
+    upVote (Just comment) voterKey True = do
       runDb $
         Sqlite.deleteWhere
-          [VoteComment ==. (entityKey comment), VoteVoter ==. (entityKey voter)]
+          [VoteComment ==. (entityKey comment), VoteVoter ==. voterKey]
       status ok200
     upVote _ _ _ = do
       status notFound404
