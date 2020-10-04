@@ -58,6 +58,15 @@ function buildApi(base) {
         mode: cors ? "cors" : "same-origin",
         body: JSON.stringify(data)
       });
+    },
+
+    voteComment: async (vote) => {
+      return fetch(base + "/vote", {
+        method: "PUT",
+        mode: cors ? "cors" : "same-origin",
+        cache: "no-store",
+        body: JSON.stringify(vote)
+      });
     }
   };
 }

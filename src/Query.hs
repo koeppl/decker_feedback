@@ -63,14 +63,13 @@ $( deriveJSON
 
 data Vote = Vote
   { voteComment :: Key Model.Comment,
-    voteVoter :: Text,
-    voteUp :: Bool
+    voteVoter :: Text
   }
   deriving (Show)
 
 $( deriveJSON
      defaultOptions
-       { fieldLabelModifier = drop 2 . map toLower
+       { fieldLabelModifier = drop 4 . map toLower
        }
      ''Vote
  )
