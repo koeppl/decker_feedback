@@ -1,0 +1,25 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "decker-engine:lib"
+
+    - path: "./app/Main.hs"
+      component: "decker-engine:exe:decker-engine"
+
+    - path: "./app/EngineUser.hs"
+      component: "decker-engine:exe:decker-engine"
+
+    - path: "./app/Paths_decker_engine.hs"
+      component: "decker-engine:exe:decker-engine"
+
+    - path: "./app/EngineUser.hs"
+      component: "decker-engine:exe:engine-user"
+
+    - path: "./app/Main.hs"
+      component: "decker-engine:exe:engine-user"
+
+    - path: "./app/Paths_decker_engine.hs"
+      component: "decker-engine:exe:engine-user"
+
+    - path: "./test"
+      component: "decker-engine:test:decker-engine-test"

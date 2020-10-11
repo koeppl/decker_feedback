@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c8d625c38134fffe65fa2df4f1fd98f9f84c8f8f00c9f8cd859d70323c535207
+-- hash: 426a2e562d2e126c082e73cfe239af3173f8604c773eec895980c73e7e2f8e11
 
 name:           decker-engine
 version:        0.1.0.0
@@ -26,7 +26,6 @@ source-repository head
 
 library
   exposed-modules:
-      Admin
       Auth
       Cors
       EngineScotty

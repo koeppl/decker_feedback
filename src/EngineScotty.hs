@@ -17,13 +17,16 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Cors
 import Data.Maybe
+import qualified Data.Text as Text
 import qualified Data.Text.Internal.Builder as Text
 import Data.Time
 import Database.Persist.Sqlite as Sqlite
 import Model
 import Network.HTTP.Types.Status
 import Network.Wai
+import Network.Wai.EventSource
 import Network.Wai.Middleware.RequestLogger
+import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Static
 import Query
 import Relude
@@ -61,13 +64,11 @@ engine = do
   users <- loadUserDB
   sessions <- newTVarIO $ fromList []
   let config = Config users sessions pool
-  state <- makeEngineState
   cors <- corsWare
-  auth <- authWare config
-  scottyT 8081 (runAction config state) (app cors auth)
+  scottyT 8081 (runAction config) (app cors)
 
-runAction :: Config -> EngineState -> EngineM Response -> IO Response
-runAction config state action =
+runAction :: Config -> EngineM Response -> IO Response
+runAction config action =
   runStdoutLoggingT (runReaderT (runEngineM action) config)
 
 type Error = Text
@@ -76,26 +77,30 @@ instance ScottyError Text where
   stringError = toText
   showError = toLazy
 
-app :: Middleware -> Middleware -> ScottyT Error EngineM ()
-app cors auth = do
+app :: Middleware -> ScottyT Error EngineM ()
+app cors = do
   middleware logStdoutDev
   middleware cors
-  -- middleware auth
   middleware $ staticPolicy (addBase "static")
-  S.get "/token" getToken'
+  S.get "/token" getToken
   S.put "/comments" getComments
   S.delete "/comments" deleteComment
   S.post "/comments" postComment
   S.put "/login" loginAdmin
   S.put "/vote" upvoteComment
 
-getToken' :: ActionT Error EngineM ()
-getToken' = do
+-- | Responds with a token for the session. If the authorization header is set,
+-- authentication by a proxy os assumed. Otherwise the app generates
+-- unauthorized.
+getToken :: ActionT Error EngineM ()
+getToken = do
   value <- fmap toStrict <$> header "Authorization"
+  deck <- fromJust . fmap toStrict <$> header "Referer"
+  logI $ "getToken from:" <> show deck
   case value of
     Just creds -> do
       -- basicly authorized
-      admin <- adminUser $ authUser value
+      admin <- adminUser (authUser value) deck
       case admin of
         Just user -> do
           -- authorized admin
@@ -127,16 +132,25 @@ mkAdminToken creds user = do
   liftIO $ atomically $ modifyTVar' sessions (Map.insert adm user)
   return $ Token rnd usr (Just adm)
 
-adminUser :: Maybe Text -> ActionT Error EngineM (Maybe User)
-adminUser login = do
+adminUser :: Maybe Text -> Text -> ActionT Error EngineM (Maybe User)
+adminUser login deck = do
   db <- users <$> asks userDB
-  return $ login >>= (flip lookup) db
+  return $ login >>= (flip lookup) db >>= isAdminForDeck deck
 
-isAdminUser :: Maybe Text -> ActionT Error EngineM (Maybe User)
-isAdminUser (Just token) = do
+isAdminUser :: Maybe Text -> Text -> ActionT Error EngineM (Maybe User)
+isAdminUser (Just token) deck = do
   sessionStore <- asks adminSessions
-  liftIO $ isAdminUser' sessionStore token
-isAdminUser Nothing = return Nothing
+  admin <- liftIO $ isAdminUser' sessionStore token
+  case admin of
+    Just user -> return $ isAdminForDeck deck user
+    _ -> return Nothing
+isAdminUser Nothing _ = return Nothing
+
+isAdminForDeck :: Text -> User -> Maybe User
+isAdminForDeck deck user =
+  if any (`Text.isPrefixOf` deck) (decks user)
+    then Just user
+    else Nothing
 
 type CommentKey = Model.Key Model.Comment
 
@@ -174,11 +188,10 @@ getComments = do
         selectList
           [CommentDeck ==. selectDeck selector]
           [Asc CommentCreated]
-  admin <- isAdminUser (selectToken selector)
-  comments <- mapM (toView (entityKey <$> user) admin) list
+  comments <- mapM (toView (entityKey <$> user)) list
   json $ reverse $ sortOn commentVotes comments
   where
-    toView user admin entity = do
+    toView user entity = do
       let c = entityVal entity
       let ckey = entityKey entity
       votes <- numberOfVotes ckey
@@ -253,10 +266,9 @@ deleteComment = do
     Just token -> do
       author <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
       comment <- runDb $ Sqlite.get (idKey ident)
-      sessions <- asks adminSessions
-      admin <- liftIO $ isAdminUser' sessions token
       case comment of
-        Just comment ->
+        Just comment -> do
+          admin <- isAdminUser (idToken ident) (Model.commentDeck comment)
           if isJust author && Model.commentAuthor comment == author || isJust admin
             then do
               logI $ "delete comment with id: " <> show (idKey ident)
@@ -270,14 +282,21 @@ deleteComment = do
 -- | Creates and returns an admin token for the provided credentials.
 loginAdmin :: ActionT Error EngineM ()
 loginAdmin = do
+  deck <- fromJust . fmap toStrict <$> header "Referer"
   creds <- jsonData
   sessions <- asks adminSessions
   udb <- asks userDB
-  case authenticateUser' (credLogin creds) (credPassword creds) udb of
+  let admin =
+        authenticateUser' (credLogin creds) (credPassword creds) udb
+          >>= isAdminForDeck deck
+  case admin of
     Just user -> do
+      logI $ "Login succeeded for: " <> show (credLogin creds) <> " on: " <> show deck
       token <- liftIO $ makeSessionToken' sessions user
       json $ (fromList [("admin", token)] :: Map Text Text)
-    Nothing -> status forbidden403
+    Nothing -> do
+      logI $ "Login failed for: " <> show (credLogin creds) <> " on: " <> show deck
+      status forbidden403
 
 upvoteComment :: ActionT Error EngineM ()
 upvoteComment = do

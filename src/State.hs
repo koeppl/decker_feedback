@@ -51,12 +51,6 @@ loadUserDB = do
   let fileName = "db/users.yaml"
   decodeFileThrow fileName
 
-makeEngineState :: IO EngineState
-makeEngineState = do
-  users <- loadUserDB
-  sessions <- newTVarIO $ fromList []
-  return $ EngineState users sessions
-
 makeSessionToken :: EngineState -> User -> IO Text
 makeSessionToken store user = do
   token <- randomToken
@@ -70,7 +64,7 @@ makeSessionToken' sessions user = do
   return token
 
 isAdminUser' :: TVar AdminSessions -> Text -> IO (Maybe User)
-isAdminUser' sessions token =
+isAdminUser' sessions token = do
   lookup token <$> (atomically $ readTVar sessions)
 
 hashPassword :: Text -> Text -> Text

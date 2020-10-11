@@ -58,7 +58,6 @@ dependencies:
   - wai
   - wai-cors
   - wai-extra
-  - wai-extra
   - wai-middleware-static
   - warp
   - yaml

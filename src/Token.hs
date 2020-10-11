@@ -23,11 +23,6 @@ type GetToken = "token" :> Header "Authorization" Text :> Get '[JSON] Token
 hash9 :: Text -> Text
 hash9 text = Text.pack $ take 9 $ show $ md5 $ encodeUtf8 text
 
--- | Generate an MD5 hash token from the attribute value. If the attribute is
--- empty, a random token is returned.
-getToken :: (Maybe Text) -> Handler Token
-getToken auth = liftIO $ calcToken auth
-
 randomToken :: IO Text
 randomToken =
   hash9 . show <$> (getStdRandom random :: IO Word64)

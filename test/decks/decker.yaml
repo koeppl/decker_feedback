@@ -1,4 +1,3 @@
 publish:
   rsync:
-    destination:
-      henrik@tramberend.beuth-hochschule.de:/var/www/internal/other/engine-test
+    destination: henrik@tramberend.beuth-hochschule.de:/var/www/internal/other/engine-test
