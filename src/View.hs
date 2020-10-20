@@ -20,6 +20,7 @@ data Comment
             , commentMarkdown :: Text
             , commentHtml :: Text
             , commentCreated :: UTCTime
+            , commentSlide :: Text
             , commentVotes :: Int
             , commentDidVote :: Bool
             }

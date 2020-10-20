@@ -209,6 +209,7 @@ getComments = do
           (Model.commentMarkdown c)
           (Model.commentHtml c)
           (Model.commentCreated c)
+          (Model.commentSlide c)
           votes
           didVote
 
