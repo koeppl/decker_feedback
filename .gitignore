@@ -1,5 +1,5 @@
 .DS_Store
 /.stack-work/
-/db/
+/db/engine.sqlite3
 .decker
 public

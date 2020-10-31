@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Q API Tester</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="water.css" type="text/css" charset="utf-8" />
+    <style type="text/css" media="screen">
+      div#comment-list-1 {
+        max-height: 20em;
+        overflow: hidden;
+        overflow-y: scroll;
+      }
+      div#comment-list-1 div {
+        color: var(--form-text);
+        background-color: var(--background);
+
+        margin-right: 6px;
+        margin-bottom: 6px;
+        padding: 10px;
+
+        border: none;
+        border-radius: 6px;
+        outline: none;
+      }
+      div#comment-list-1 div button {
+        color: white;
+        background-color: #a00;
+
+        margin: 0;
+        padding: 2px 4px;
+
+        border: none;
+        border-radius: 3px;
+        outline: none;
+
+        float: right;
+      }
+      i.example {
+        float: right;
+        color: var(--background);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Q API Login</h1>
+    </header>
+
+    <p>
+     This page tests the deck facing admin API of the Decker Engine.
+    </p>
+
+    <label for="user">User</label>
+    <input type="text" name="user" id="user" />
+    <label for="passwd">Password</label>
+    <input type="password" name="passwd" value="" id="passwd" />
+    <button id="login">Login</button> 
+
+    <script>
+      let user = document.querySelector("input#user");
+      let passwd = document.querySelector("input#password");
+      let login = document.querySelector("button#login");
+
+      login.addEventListener("click", e => {
+      });
+
+    </script>
+  </body>
+</html>
