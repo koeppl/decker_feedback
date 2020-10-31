@@ -24,9 +24,9 @@ import Database.Persist.Sqlite as Sqlite
 import Model
 import Network.HTTP.Types.Status
 import Network.Wai
-import Network.Wai.EventSource
+-- import Network.Wai.EventSource
 import Network.Wai.Middleware.RequestLogger
-import Network.Wai.Middleware.Routed
+-- import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Static
 import Query
 import Relude
@@ -62,6 +62,7 @@ engine :: IO ()
 engine = do
   pool <- connectDB
   users <- loadUserDB
+  putStrLn $ show users
   sessions <- newTVarIO $ fromList []
   let config = Config users sessions pool
   cors <- corsWare
@@ -283,21 +284,30 @@ deleteComment = do
 -- | Creates and returns an admin token for the provided credentials.
 loginAdmin :: ActionT Error EngineM ()
 loginAdmin = do
-  deck <- fromJust . fmap toStrict <$> header "Referer"
+  -- deck <- fromJust . fmap toStrict <$> header "Referer"
   creds <- jsonData
+  let deck = credDeck creds
   sessions <- asks adminSessions
   udb <- asks userDB
-  let admin =
-        authenticateUser' (credLogin creds) (credPassword creds) udb
-          >>= isAdminForDeck deck
+  let admin = authenticateUser' (credLogin creds) (credPassword creds) udb
   case admin of
-    Just user -> do
-      logI $ "Login succeeded for: " <> show (credLogin creds) <> " on: " <> show deck
-      token <- liftIO $ makeSessionToken' sessions user
-      json $ (fromList [("admin", token)] :: Map Text Text)
-    Nothing -> do
-      logI $ "Login failed for: " <> show (credLogin creds) <> " on: " <> show deck
-      status forbidden403
+    Nothing -> logE $ "Authentication failed for: " <> credLogin creds
+    Just admin -> do
+      let forDeck = isAdminForDeck deck admin
+      case forDeck of
+        Nothing -> do
+          logE $
+            "Admin: "
+              <> login admin
+              <> " not authorized for: "
+              <> deck
+              <> " "
+              <> show (decks admin)
+          status forbidden403
+        Just user -> do
+          logI $ "Login succeeded for: " <> show (credLogin creds) <> " on: " <> show deck
+          token <- liftIO $ makeSessionToken' sessions user
+          json $ (fromList [("admin", token)] :: Map Text Text)
 
 upvoteComment :: ActionT Error EngineM ()
 upvoteComment = do
@@ -325,3 +335,6 @@ upvoteComment = do
       status notFound404
 
 logI = lift . logInfoN
+
+-- logW = lift . logWarnN
+logE = lift . logErrorN

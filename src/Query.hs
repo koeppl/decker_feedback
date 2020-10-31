@@ -14,7 +14,8 @@ import Relude
 
 data Credentials = Credentials
   { credLogin :: Text,
-    credPassword :: Text
+    credPassword :: Text,
+    credDeck :: Text
   }
   deriving (Show)
 
