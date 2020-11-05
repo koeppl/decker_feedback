@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 426a2e562d2e126c082e73cfe239af3173f8604c773eec895980c73e7e2f8e11
+-- hash: 55c8a5b19688d7406d970726e46eafdc141f4644f21223cdd35638ab0ad466e0
 
 name:           decker-engine
 version:        0.1.0.0
@@ -28,9 +28,11 @@ library
   exposed-modules:
       Auth
       Cors
+      Engine
       EngineScotty
       HTML
       Model
+      Notify
       Query
       State
       Token
@@ -59,6 +61,7 @@ library
     , http-api-data
     , http-media
     , http-types
+    , mime-mail
     , monad-logger
     , mtl
     , network-uri
@@ -113,6 +116,7 @@ executable decker-engine
     , http-api-data
     , http-media
     , http-types
+    , mime-mail
     , monad-logger
     , mtl
     , network-uri
@@ -167,6 +171,7 @@ executable engine-user
     , http-api-data
     , http-media
     , http-types
+    , mime-mail
     , monad-logger
     , mtl
     , network-uri
@@ -224,6 +229,7 @@ test-suite decker-engine-test
     , http-api-data
     , http-media
     , http-types
+    , mime-mail
     , monad-logger
     , mtl
     , network-uri

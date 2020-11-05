@@ -38,6 +38,7 @@ dependencies:
   - http-types
   - monad-logger
   - mtl
+  - mime-mail
   - network-uri
   - persistent
   - persistent-sqlite

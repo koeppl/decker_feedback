@@ -4,11 +4,62 @@
 module Auth where
 
 import Data.ByteString.Base64
+import qualified Data.Map as Map
 import qualified Data.Text as Text
+import Engine
 import Network.Wai
 import Network.Wai.Middleware.HttpAuth
 import Relude
 import State
+import Token
+
+mkRandomToken :: Handler Token
+mkRandomToken = do
+  rnd <- liftIO randomToken
+  return $ Token rnd Nothing Nothing
+
+mkUserToken :: Text -> Handler Token
+mkUserToken creds = do
+  rnd <- liftIO randomToken
+  let usr = Just $ hash9 creds
+  return $ Token rnd usr Nothing
+
+mkAdminToken :: Text -> User -> Handler Token
+mkAdminToken creds user = do
+  rnd <- liftIO randomToken
+  let usr = Just $ hash9 creds
+  adm <- liftIO randomToken
+  sessions <- asks adminSessions
+  liftIO $ atomically $ modifyTVar' sessions (Map.insert adm user)
+  return $ Token rnd usr (Just adm)
+
+adminUser :: Maybe Text -> Text -> Handler (Maybe User)
+adminUser login deck = do
+  db <- users <$> asks userDB
+  return $ login >>= flip Map.lookup db >>= isAdminForDeck deck
+
+isAdminUser :: Maybe Text -> Text -> Handler (Maybe User)
+isAdminUser (Just token) deck = do
+  sessionStore <- asks adminSessions
+  admin <- liftIO $ isAdminUser' sessionStore token
+  case admin of
+    Just user -> return $ isAdminForDeck deck user
+    _ -> return Nothing
+isAdminUser Nothing _ = return Nothing
+
+-- Decks that are considered local test decks and can be administered by
+-- everyone
+localDecks = ["http://localhost", "http://0.0.0.0"]
+
+isLocalDeck :: Text -> Bool
+isLocalDeck deck = any (`Text.isPrefixOf` deck) localDecks
+
+-- Checks if user is admin for the deck. All users are admin for local test decks.
+isAdminForDeck :: Text -> User -> Maybe User
+isAdminForDeck deck user =
+  if any (`Text.isPrefixOf` deck) (decks user <> localDecks)
+    then Just user
+    else Nothing
 
 -- | Creates a middleware that uses Basic Auth to authenticate all requests to
 -- to the login endpoint.
@@ -22,7 +73,7 @@ authWare config = do
 
 checkAdmin :: Config -> ByteString -> ByteString -> IO Bool
 checkAdmin config user password = do
-  putStrLn $ "Login attempt: " <> show user 
+  putStrLn $ "Login attempt: " <> show user
   return $
     authenticateUser
       (decodeUtf8 user)
