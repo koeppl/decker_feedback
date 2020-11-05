@@ -54,7 +54,6 @@ notifyAdminsOfDeck config comment = do
               <> commentMarkdown comment
       let mail = simpleMail' to from "New question in deck" (toLazy text)
       renderSendMail mail
-      print mail
 
 allCommentsForDeck :: Config -> Text -> IO [Model.Comment]
 allCommentsForDeck config deck = do
