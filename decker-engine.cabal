@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 55c8a5b19688d7406d970726e46eafdc141f4644f21223cdd35638ab0ad466e0
+-- hash: ea6c76857525cdc639ed20561908c6f927e3922c67da1e84cc42e47cff3c48f1
 
 name:           decker-engine
 version:        0.1.0.0
@@ -57,6 +57,7 @@ library
     , either
     , fast-logger
     , filepath
+    , groom
     , hdaemonize
     , http-api-data
     , http-media
@@ -112,6 +113,7 @@ executable decker-engine
     , either
     , fast-logger
     , filepath
+    , groom
     , hdaemonize
     , http-api-data
     , http-media
@@ -167,6 +169,7 @@ executable engine-user
     , either
     , fast-logger
     , filepath
+    , groom
     , hdaemonize
     , http-api-data
     , http-media
@@ -222,6 +225,7 @@ test-suite decker-engine-test
     , either
     , fast-logger
     , filepath
+    , groom
     , hdaemonize
     , hspec
     , hspec-wai

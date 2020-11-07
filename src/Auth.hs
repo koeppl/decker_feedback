@@ -52,14 +52,22 @@ isAdminUser Nothing _ = return Nothing
 localDecks = ["http://localhost", "http://0.0.0.0"]
 
 isLocalDeck :: Text -> Bool
-isLocalDeck deck = any (`Text.isPrefixOf` deck) localDecks
+isLocalDeck = hasAnyPrefix localDecks
 
 -- Checks if user is admin for the deck. All users are admin for local test decks.
 isAdminForDeck :: Text -> User -> Maybe User
 isAdminForDeck deck user =
-  if any (`Text.isPrefixOf` deck) (decks user <> localDecks)
+  if hasAnyPrefix (decks user <> localDecks) deck
     then Just user
     else Nothing
+
+-- Checks if a notification email should be sent to user. Never send for local
+-- test decks.
+sendEmailForDeck :: Text -> User -> Bool
+sendEmailForDeck deck user = hasAnyPrefix (decks user) deck
+
+hasAnyPrefix :: [Text] -> Text -> Bool
+hasAnyPrefix prefixes text = any (`Text.isPrefixOf` text) prefixes
 
 -- | Creates a middleware that uses Basic Auth to authenticate all requests to
 -- to the login endpoint.
