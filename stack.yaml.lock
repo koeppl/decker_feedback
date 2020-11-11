@@ -6,6 +6,9 @@
 packages:
 - completed:
     subdir: commonmark
+    cabal-file:
+      size: 3278
+      sha256: fbff7a2ade0ce7d699964a87f765e503a3a9e22542c05f0f02ba7aad64e38af4
     name: commonmark
     version: 0.1.0.2
     git: git@github.com:jgm/commonmark-hs.git
