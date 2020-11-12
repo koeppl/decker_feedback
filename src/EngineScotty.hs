@@ -12,6 +12,7 @@ import Commonmark
 
 -- import Network.Wai.Middleware.Routed
 
+import Control.Concurrent.STM (newTChan)
 import Control.Monad.Logger
 import Cors
 import Data.Maybe
@@ -30,7 +31,6 @@ import Relude
 import State
 import View
 import Web.Scotty.Trans as S
-import Control.Concurrent.STM (newTChan)
 
 connectDB :: IO ConnectionPool
 connectDB = runStdoutLoggingT $ do
@@ -66,7 +66,7 @@ app cors = do
   S.get "/token" getToken
   S.put "/comments" getComments
   S.delete "/comments" deleteComment
-  S.post "/comments" postComment
+  S.post "/comments" postOrUpdateComment
   S.put "/login" loginAdmin
   S.put "/vote" upvoteComment
 
@@ -168,17 +168,36 @@ getOrCreatePerson token = do
       person <- fromJust <$> runDb (Sqlite.get key)
       return $ Entity key person
 
-postComment :: Handler ()
-postComment = do
-  logI "GET /comments"
+postOrUpdateComment :: Handler ()
+postOrUpdateComment = do
   cdata <- jsonData
   logI $ show cdata
+  update <-
+    case Query.commentId cdata of
+      Just cId -> canDelete (commentToken cdata) cId
+      Nothing -> return False
+  if update
+    then updateComment cdata
+    else postComment cdata
+
+updateComment :: Query.CommentData -> Handler ()
+updateComment cdata = do
+  logI $ "Updating comment: " <> show (Query.commentId cdata)
+  now <- liftIO getCurrentTime
+  runDb $
+    Sqlite.update
+      (fromJust $ Query.commentId cdata)
+      [ CommentMarkdown =. Query.commentMarkdown cdata,
+        CommentHtml =. compileMarkdown (Query.commentMarkdown cdata),
+        CommentCreated =. now
+      ]
+
+postComment :: Query.CommentData -> Handler ()
+postComment cdata = do
   now <- liftIO getCurrentTime
   author <- case commentToken cdata of
     Just token -> do
-      key <-
-        fmap entityKey
-          <$> runDb (selectFirst [PersonToken ==. token] [])
+      key <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
       case key of
         Just key -> return $ Just key
         Nothing -> Just <$> runDb (Sqlite.insert (Person token))
@@ -194,28 +213,33 @@ postComment = do
           now
   key <- runDb $ Sqlite.insert comment
   notify comment
-  logI $ "insert comment with id: " <> show key
+  logI $ "Creating comment: " <> show key
   status ok200
+
+canDelete :: Maybe Text -> Key Model.Comment -> Handler Bool
+canDelete token key = do
+  case token of
+    Just token -> do
+      author <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
+      comment <- runDb $ Sqlite.get key
+      case comment of
+        Just comment -> do
+          admin <- isAdminUser (Just token) (Model.commentDeck comment)
+          return $ isJust author && Model.commentAuthor comment == author || isJust admin
+        Nothing -> return False
+    Nothing -> return False
 
 deleteComment :: Handler ()
 deleteComment = do
   ident <- jsonData
-  case idToken ident of
-    Just token -> do
-      author <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
-      comment <- runDb $ Sqlite.get (idKey ident)
-      case comment of
-        Just comment -> do
-          admin <- isAdminUser (idToken ident) (Model.commentDeck comment)
-          if isJust author && Model.commentAuthor comment == author || isJust admin
-            then do
-              logI $ "delete comment with id: " <> show (idKey ident)
-              runDb $ Sqlite.deleteWhere [VoteComment ==. idKey ident]
-              runDb $ Sqlite.delete (idKey ident)
-              status noContent204
-            else status forbidden403
-        Nothing -> status notFound404
-    Nothing -> status forbidden403
+  delete <- canDelete (idToken ident) (idKey ident)
+  if delete
+    then do
+      logI $ "Delete comment with id: " <> show (idKey ident)
+      runDb $ Sqlite.deleteWhere [VoteComment ==. idKey ident]
+      runDb $ Sqlite.delete (idKey ident)
+      status noContent204
+    else status forbidden403
 
 -- | Creates and returns an admin token for the provided credentials.
 loginAdmin :: Handler ()

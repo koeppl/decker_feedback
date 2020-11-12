@@ -1,4 +1,4 @@
-export { buildApi };
+export {buildApi};
 
 function buildApi(base) {
   let cors = window.location.origin !== new URL(base).origin;
@@ -25,7 +25,7 @@ function buildApi(base) {
     },
 
     getComments: async (deck, slide, token) => {
-      let data = { deck: deck, slide: slide, token: token };
+      let data = {deck: deck, slide: slide, token: token};
       return fetch(base + "/comments", {
         /* Need to use put, because server does not accept data in
          * request body of GET. */
@@ -36,13 +36,14 @@ function buildApi(base) {
       }).then(response => response.json());
     },
 
-    submitComment: (deck, slide, token, markdown) => {
+    submitComment: (deck, slide, token, markdown, commentId) => {
       if (!markdown) return;
       let data = {
         deck: deck,
         slide: slide,
         token: token,
-        markdown: markdown
+        markdown: markdown,
+        id: commentId ? commentId : null
       };
       return fetch(base + "/comments", {
         method: "POST",
@@ -52,7 +53,7 @@ function buildApi(base) {
     },
 
     deleteComment: (key, token) => {
-      let data = { key: key, token: token };
+      let data = {key: key, token: token};
       return fetch(base + "/comments", {
         method: "DELETE",
         mode: cors ? "cors" : "same-origin",

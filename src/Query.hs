@@ -9,7 +9,7 @@ module Query where
 import Data.Aeson.TH
 import Data.Char
 import Database.Persist.Sqlite
-import qualified Model as Model
+import qualified Model
 import Relude
 
 data Credentials = Credentials
@@ -28,7 +28,8 @@ data CommentData = CommentData
   { commentMarkdown :: Text,
     commentToken :: Maybe Text,
     commentDeck :: Text,
-    commentSlide :: Text
+    commentSlide :: Text,
+    commentId :: Maybe (Key Model.Comment)
   }
   deriving (Show)
 
