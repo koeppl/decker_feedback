@@ -1,6 +1,7 @@
 .DS_Store
 /.stack-work/
 /db/engine.sqlite3
+/db/engine.db
 .decker
 public
 *-shm
