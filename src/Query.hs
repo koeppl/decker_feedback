@@ -11,6 +11,7 @@ import Data.Char
 import Database.Persist.Sqlite
 import qualified Model
 import Relude
+import Data.Time
 
 data Credentials = Credentials
   { credLogin :: Text,
@@ -29,7 +30,8 @@ data CommentData = CommentData
     commentToken :: Maybe Text,
     commentDeck :: Text,
     commentSlide :: Text,
-    commentId :: Maybe (Key Model.Comment)
+    commentId :: Maybe (Key Model.Comment),
+    commentAnswered :: Maybe UTCTime
   }
   deriving (Show)
 

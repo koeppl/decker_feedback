@@ -172,6 +172,7 @@ postOrUpdateComment :: Handler ()
 postOrUpdateComment = do
   cdata <- jsonData
   logI $ show cdata
+  -- If a commentId is given, update existing, else create new one
   update <-
     case Query.commentId cdata of
       Just cId -> canDelete (commentToken cdata) cId
@@ -183,13 +184,12 @@ postOrUpdateComment = do
 updateComment :: Query.CommentData -> Handler ()
 updateComment cdata = do
   logI $ "Updating comment: " <> show (Query.commentId cdata)
-  now <- liftIO getCurrentTime
   runDb $
     Sqlite.update
       (fromJust $ Query.commentId cdata)
       [ CommentMarkdown =. Query.commentMarkdown cdata,
         CommentHtml =. compileMarkdown (Query.commentMarkdown cdata),
-        CommentCreated =. now
+        CommentAnswered =. Query.commentAnswered cdata
       ]
 
 postComment :: Query.CommentData -> Handler ()
@@ -211,6 +211,7 @@ postComment cdata = do
           deck
           (Query.commentSlide cdata)
           now
+          Nothing
   key <- runDb $ Sqlite.insert comment
   notify comment
   logI $ "Creating comment: " <> show key

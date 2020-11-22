@@ -1,4 +1,4 @@
-export { buildApi };
+export {buildApi};
 
 function buildApi(base) {
   let cors = window.location.origin !== new URL(base).origin;
@@ -15,7 +15,7 @@ function buildApi(base) {
       }).then(response => response.json());
     },
 
-    getLogin: async credentials => {
+    getLogin: async (credentials) => {
       return fetch(base + "/login", {
         method: "PUT",
         mode: cors ? "cors" : "same-origin",
@@ -24,45 +24,34 @@ function buildApi(base) {
       }).then(response => response.json());
     },
 
-    getComments: async (deck, slide, token) => {
-      let data = { deck: deck, slide: slide, token: token };
+    getComments: async (query) => {
       return fetch(base + "/comments", {
         /* Need to use put, because server does not accept data in
-           request body of GET. */
+         * request body of GET. */
         method: "PUT",
         mode: cors ? "cors" : "same-origin",
         cache: "no-store",
-        body: JSON.stringify(data)
+        body: JSON.stringify(query)
       }).then(response => response.json());
     },
 
-    submitComment: (deck, slide, token, markdown, id, answered) => {
-      if (!markdown) return;
-      let data = {
-        deck: deck,
-        slide: slide,
-        token: token,
-        markdown: markdown,
-        id: id,
-        answered: answered
-      };
+    submitComment: (comment) => {
       return fetch(base + "/comments", {
         method: "POST",
         mode: cors ? "cors" : "same-origin",
-        body: JSON.stringify(data)
+        body: JSON.stringify(comment)
       });
     },
 
-    deleteComment: (key, token) => {
-      let data = { key: key, token: token };
+    deleteComment: (ident) => {
       return fetch(base + "/comments", {
         method: "DELETE",
         mode: cors ? "cors" : "same-origin",
-        body: JSON.stringify(data)
+        body: JSON.stringify(ident)
       });
     },
 
-    voteComment: async vote => {
+    voteComment: async (vote) => {
       return fetch(base + "/vote", {
         method: "PUT",
         mode: cors ? "cors" : "same-origin",

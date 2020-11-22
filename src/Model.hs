@@ -29,9 +29,6 @@ Person json
   token Text
   UniquePersonToken token
   deriving Show Eq
-Vote 
-  comment CommentId
-  voter PersonId
 Comment json
   markdown Text
   html Text
@@ -39,5 +36,9 @@ Comment json
   deck Text
   slide Text
   created UTCTime default=CURRENT_TIME
+  answered UTCTime Maybe
   deriving Show Eq
+Vote 
+  comment CommentId
+  voter PersonId
 |]
