@@ -8,11 +8,12 @@ module Query where
 
 import Data.Aeson.TH
 import Data.Char
+import Data.Time
 import Database.Persist.Sqlite
 import qualified Model
 import Relude
-import Data.Time
 
+-- Admin login
 data Credentials = Credentials
   { credLogin :: Text,
     credPassword :: Text,
