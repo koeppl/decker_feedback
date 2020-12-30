@@ -21,7 +21,7 @@ import Text.Blaze.Html
 import Text.Blaze.Html.Renderer.Pretty
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import Text.Groom
+-- import Text.Groom
 
 startNotifier :: Config -> IO ()
 startNotifier config = do

@@ -65,10 +65,12 @@ app cors = do
   middleware $ staticPolicy (addBase "static")
   S.get "/token" getToken
   S.put "/comments" getComments
-  S.delete "/comments" deleteComment
   S.post "/comments" postOrUpdateComment
+  S.delete "/comments" deleteComment
   S.put "/login" loginAdmin
   S.put "/vote" upvoteComment
+  S.post "/answers" postAnswer
+  S.delete "/answers" deleteAnswer
 
 -- | Responds with a token for the session. If the authorization header is set,
 -- authentication by a proxy os assumed. Otherwise the app generates
@@ -123,12 +125,21 @@ getComments = do
           [Asc CommentCreated]
     Nothing ->
       runDb $
-        selectList
+        Sqlite.selectList
           [CommentDeck ==. selectDeck selector]
           [Asc CommentCreated]
   comments <- mapM (toView (entityKey <$> user)) list
   json $ sortOn (Down . commentVotes) comments
   where
+    toViewAnswer answer =
+      let key = entityKey answer
+          val = entityVal answer
+       in View.Answer
+            key
+            (Model.answerMarkdown val)
+            (compileMarkdown <$> Model.answerMarkdown val)
+            (Model.answerLink val)
+            (Model.answerCreated val)
     toView user entity = do
       let c = entityVal entity
       let ckey = entityKey entity
@@ -140,6 +151,7 @@ getComments = do
         case Model.commentAuthor c of
           Just authorId -> runDb $ Sqlite.get authorId
           Nothing -> return Nothing
+      answers <- runDb $ Sqlite.selectList [AnswerComment ==. ckey] [Asc AnswerCreated]
       return $
         View.Comment
           (entityKey entity)
@@ -150,6 +162,7 @@ getComments = do
           (Model.commentSlide c)
           votes
           didVote
+          (map toViewAnswer answers)
 
 compileMarkdown :: Text -> Text
 compileMarkdown markdown =
@@ -188,8 +201,7 @@ updateComment cdata = do
     Sqlite.update
       (fromJust $ Query.commentId cdata)
       [ CommentMarkdown =. Query.commentMarkdown cdata,
-        CommentHtml =. compileMarkdown (Query.commentMarkdown cdata),
-        CommentAnswered =. Query.commentAnswered cdata
+        CommentHtml =. compileMarkdown (Query.commentMarkdown cdata)
       ]
 
 postComment :: Query.CommentData -> Handler ()
@@ -211,14 +223,13 @@ postComment cdata = do
           deck
           (Query.commentSlide cdata)
           now
-          Nothing
   key <- runDb $ Sqlite.insert comment
   notify comment
   logI $ "Creating comment: " <> show key
   status ok200
 
 canDelete :: Maybe Text -> Key Model.Comment -> Handler Bool
-canDelete token key = do
+canDelete token key =
   case token of
     Just token -> do
       author <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
@@ -294,6 +305,58 @@ upvoteComment = do
       status ok200
     upVote _ _ _ =
       status notFound404
+
+canDeleteAnswer' :: Maybe Text -> Key Model.Answer -> Handler Bool
+canDeleteAnswer' token key = return True
+
+canDeleteAnswer :: Maybe Text -> Key Model.Answer -> Handler Bool
+canDeleteAnswer token key =
+  case token of
+    Just token -> do
+      author <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
+      answer <- runDb $ Sqlite.get key
+      case answer of
+        Just answer -> do
+          comment <- runDb $ Sqlite.get (Model.answerComment answer)
+          case comment of
+            Just comment -> do
+              admin <- isAdminUser (Just token) (Model.commentDeck comment)
+              return $ isJust author && Model.commentAuthor comment == author || isJust admin
+            Nothing -> return False
+        Nothing -> return False
+    Nothing -> return False
+
+deleteAnswer :: Handler ()
+deleteAnswer = do
+  ident <- jsonData
+  let key = toSqlKey (eidKey ident) :: Key Model.Answer
+  let token = eidToken ident
+  delete <- canDeleteAnswer token key
+  if delete
+    then do
+      logI $ "Delete answer with id: " <> show key
+      runDb $ Sqlite.delete key
+      status noContent204
+    else status forbidden403
+
+postAnswer :: Handler ()
+postAnswer = do
+  answer <- jsonData
+  let commentId = Query.answerComment answer
+  comment <- runDb (Sqlite.get commentId)
+  case comment of
+    Just comment -> do
+      let markdown = Query.answerMarkdown answer
+      let link = Query.answerLink answer
+      let token = Query.answerToken answer
+      now <- liftIO getCurrentTime
+      admin <- isAdminUser (Just token) (Model.commentDeck comment)
+      case admin of
+        Just user -> do
+          runDb $ Sqlite.insert (Model.Answer commentId markdown link now)
+          status ok200
+        Nothing -> status forbidden403
+    Nothing -> status notFound404
 
 logI = lift . logInfoN
 

@@ -1,6 +1,7 @@
 import { buildApi } from "./decker-util.js";
 
-let util = buildApi(".");
+let util = buildApi(window.location.origin);
+window.Decker = util;
 
 window.addEventListener("load", async _ => {
   let deckid = document.getElementById("deckid");
@@ -74,6 +75,7 @@ window.addEventListener("load", async _ => {
       container.removeChild(container.lastChild);
     }
     for (let comment of list) {
+      console.log(comment);
       let div = document.createElement("div");
       div.innerHTML = comment.html;
       if (comment.delete) {

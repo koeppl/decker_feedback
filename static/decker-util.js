@@ -1,4 +1,4 @@
-export { buildApi };
+export {buildApi};
 
 function buildApi(base) {
   let cors = window.location.origin !== new URL(base).origin;
@@ -25,7 +25,7 @@ function buildApi(base) {
     },
 
     getComments: async (deck, slide, token) => {
-      let data = { deck: deck, slide: slide, token: token };
+      let data = {deck: deck, slide: slide, token: token};
       return fetch(base + "/comments", {
         /* Need to use put, because server does not accept data in
            request body of GET. */
@@ -54,7 +54,7 @@ function buildApi(base) {
     },
 
     deleteComment: (key, token) => {
-      let data = { key: key, token: token };
+      let data = {key: key, token: token};
       return fetch(base + "/comments", {
         method: "DELETE",
         mode: cors ? "cors" : "same-origin",
@@ -69,6 +69,30 @@ function buildApi(base) {
         cache: "no-store",
         body: JSON.stringify(vote)
       });
-    }
+    },
+
+    postAnswer: (commentId, token, markdown, link) => {
+      let data = {
+        comment: commentId,
+        markdown: markdown,
+        link: link,
+        token: token,
+      };
+      return fetch(base + "/answers", {
+        method: "POST",
+        mode: cors ? "cors" : "same-origin",
+        body: JSON.stringify(data)
+      });
+    },
+
+    deleteAnswer: (key, token) => {
+      let data = {key: key, token: token};
+      return fetch(base + "/answers", {
+        method: "DELETE",
+        mode: cors ? "cors" : "same-origin",
+        body: JSON.stringify(data)
+      });
+    },
+
   };
 }
