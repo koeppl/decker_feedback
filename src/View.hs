@@ -37,7 +37,7 @@ data Comment = Comment
     commentSlide :: Text,
     commentVotes :: Int,
     commentDidVote :: Bool,
-    commentAnswer :: [Answer]
+    commentAnswers :: [Answer]
   }
   deriving (Show)
 
