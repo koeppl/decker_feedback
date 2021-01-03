@@ -1,6 +1,8 @@
 import {buildApi} from "./decker-util.js";
 
-let util = buildApi(window.location.origin);
+let location = window.location.toString();
+let base = location.substring(0, location.lastIndexOf("/"));
+let util = buildApi(base);
 window.Decker = util;
 
 window.addEventListener("load", async _ => {

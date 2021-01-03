@@ -3,6 +3,7 @@ export {buildApi};
 function buildApi(base) {
   let cors = window.location.origin !== new URL(base).origin;
 
+  console.log("buildApi: base = " + base);
   console.log("buildApi: cors = " + cors);
 
   return {
