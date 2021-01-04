@@ -244,12 +244,15 @@ canDelete token key =
 deleteComment :: Handler ()
 deleteComment = do
   ident <- jsonData
-  delete <- canDelete (idToken ident) (idKey ident)
+  let id = idKey ident
+  let token = idToken ident
+  delete <- canDelete token id
   if delete
     then do
-      logI $ "Delete comment with id: " <> show (idKey ident)
-      runDb $ Sqlite.deleteWhere [VoteComment ==. idKey ident]
-      runDb $ Sqlite.delete (idKey ident)
+      logI $ "Delete comment with id: " <> show  id
+      runDb $ Sqlite.deleteWhere [VoteComment ==. id]
+      runDb $ Sqlite.deleteWhere [AnswerComment ==. id]
+      runDb $ Sqlite.delete id
       status noContent204
     else status forbidden403
 
