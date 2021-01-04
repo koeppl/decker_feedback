@@ -4,7 +4,7 @@ Description=Decker Engine
 [Service]
 Type=simple
 WorkingDirectory=/var/local/decker
-ExecStart=/usr/local/bin/decker-engine
+ExecStart=/usr/local/bin/decker-engine-exe
 User=decker
 Group=decker
 Restart=always

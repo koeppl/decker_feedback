@@ -33,7 +33,6 @@ dependencies:
   - fast-logger
   - filepath
   - groom
-  - hdaemonize
   - http-api-data
   - http-media
   - http-types
