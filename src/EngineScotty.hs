@@ -77,20 +77,25 @@ app cors = do
 -- unauthorized.
 getToken :: Handler ()
 getToken = do
-  value <- fmap toStrict <$> header "Authorization"
-  deck <- toStrict . fromJust <$> header "Referer"
-  logI $ "getToken from:" <> show deck
-  case value of
-    Just creds -> do
-      -- basicly authorized
-      admin <- adminUser (authUser value) deck
-      case admin of
-        Just user ->
-          mkAdminToken creds user >>= json
-        Nothing ->
-          mkUserToken creds >>= json
+  referer <- fmap toStrict <$> header "Referrer"
+  case referer of
+    Just url -> do
+      authorization <- fmap toStrict <$> header "Authorization"
+      logI $ "getToken from: " <> show referer
+      case authorization of
+        Just creds -> do
+          -- basicly authorized
+          admin <- adminUser (authUser authorization) url
+          case admin of
+            Just user ->
+              mkAdminToken creds user >>= json
+            Nothing ->
+              mkUserToken creds >>= json
+        Nothing -> do
+          logI $ "generate token for: " <> show referer
+          mkRandomToken >>= json
     Nothing ->
-      mkRandomToken >>= json
+      status $ mkStatus 403 "No referrer given"
 
 type CommentKey = Model.Key Model.Comment
 
@@ -249,7 +254,7 @@ deleteComment = do
   delete <- canDelete token id
   if delete
     then do
-      logI $ "Delete comment with id: " <> show  id
+      logI $ "Delete comment with id: " <> show id
       runDb $ Sqlite.deleteWhere [VoteComment ==. id]
       runDb $ Sqlite.deleteWhere [AnswerComment ==. id]
       runDb $ Sqlite.delete id
