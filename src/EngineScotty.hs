@@ -80,7 +80,7 @@ getToken = do
   authorization <- fmap toStrict <$> header "Authorization"
   case authorization of
     Just creds -> do
-      referrer <- fmap toStrict <$> header "Referrer"
+      referrer <- fmap toStrict <$> header "Referer" -- [sic]
       logI $ "getToken from: " <> show referrer
       case referrer of
         Just url -> do
