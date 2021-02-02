@@ -77,25 +77,27 @@ app cors = do
 -- unauthorized.
 getToken :: Handler ()
 getToken = do
-  referer <- fmap toStrict <$> header "Referrer"
-  case referer of
-    Just url -> do
-      authorization <- fmap toStrict <$> header "Authorization"
-      logI $ "getToken from: " <> show referer
-      case authorization of
-        Just creds -> do
-          -- basicly authorized
+  authorization <- fmap toStrict <$> header "Authorization"
+  case authorization of
+    Just creds -> do
+      referrer <- fmap toStrict <$> header "Referrer"
+      logI $ "getToken from: " <> show referrer
+      case referrer of
+        Just url -> do
           admin <- adminUser (authUser authorization) url
           case admin of
-            Just user ->
+            Just user -> do
+              logI $ "generating user token"
               mkAdminToken creds user >>= json
-            Nothing ->
+            Nothing -> do
+              logI $ "generating user token"
               mkUserToken creds >>= json
         Nothing -> do
-          logI $ "generate token for: " <> show referer
+          logI $ "generating anonymous token"
           mkRandomToken >>= json
-    Nothing ->
-      status $ mkStatus 403 "No referrer given"
+    Nothing -> do
+      logI $ "generating anonymous token"
+      mkRandomToken >>= json
 
 type CommentKey = Model.Key Model.Comment
 
