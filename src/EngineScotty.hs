@@ -12,10 +12,13 @@ import Commonmark
 
 -- import Network.Wai.Middleware.Routed
 
+import Conduit (MonadUnliftIO)
 import Control.Concurrent.STM (newTChan)
 import Control.Monad.Logger
 import Cors
+import Data.Acquire (with)
 import Data.Maybe
+import Data.Pool (Pool)
 import qualified Data.Text.Internal.Builder as Text
 import Data.Time
 import Database.Persist.Sqlite as Sqlite
@@ -35,8 +38,18 @@ import Web.Scotty.Trans as S
 connectDB :: IO ConnectionPool
 connectDB = runStdoutLoggingT $ do
   pool <- createSqlitePool "db/engine.sqlite3" 10
+  runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=OFF" []) pool
   runSqlPool (runMigration migrateAll) pool
+  runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=ON" []) pool
   return pool
+
+runSqlPoolNoTransaction ::
+  forall backend m a.
+  (MonadUnliftIO m, BackendCompatible SqlBackend backend) =>
+  ReaderT backend m a ->
+  Pool backend ->
+  m a
+runSqlPoolNoTransaction r pconn = with (unsafeAcquireSqlConnFromPool pconn) $ runReaderT r
 
 runDb req = do
   pool <- asks dbPool
@@ -214,6 +227,7 @@ updateComment cdata = do
 postComment :: Query.CommentData -> Handler ()
 postComment cdata = do
   now <- liftIO getCurrentTime
+  referrer <- fmap toStrict <$> header "Referer" -- [sic]
   author <- case commentToken cdata of
     Just token -> do
       key <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
@@ -227,6 +241,7 @@ postComment cdata = do
           (Query.commentMarkdown cdata)
           (compileMarkdown (Query.commentMarkdown cdata))
           author
+          referrer
           deck
           (Query.commentSlide cdata)
           now

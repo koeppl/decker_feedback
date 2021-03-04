@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a06ced944ef8002da1a0196feda9d745bc39b0babf78cb588358e4a8174880c5
+-- hash: 673bd33cf1bc4b68db95dd0169059cbad809dd3869e055f8c8d898aed20fd042
 
 name:           decker-engine
 version:        0.1.0.0
@@ -73,6 +73,7 @@ library
     , random
     , relude
     , resource-pool
+    , resourcet
     , scotty
     , servant
     , servant-docs
@@ -128,6 +129,7 @@ executable decker-engine-exe
     , random
     , relude
     , resource-pool
+    , resourcet
     , scotty
     , servant
     , servant-docs
@@ -186,6 +188,7 @@ test-suite decker-engine-test
     , random
     , relude
     , resource-pool
+    , resourcet
     , scotty
     , servant
     , servant-docs

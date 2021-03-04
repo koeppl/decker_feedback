@@ -47,6 +47,7 @@ dependencies:
   - random
   - relude
   - resource-pool
+  - resourcet
   - scotty
   - servant
   - servant-docs
