@@ -35,6 +35,7 @@ Comment json
   markdown Text
   html Text
   author PersonId Maybe
+  referrer Text Maybe
   deck Text
   slide Text
   created UTCTime default=CURRENT_TIME
