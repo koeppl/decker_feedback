@@ -84,7 +84,8 @@ renderCommentHtml comment allComments =
       slide = toString $ commentSlide comment
       referrer = parseURI =<< (toString <$> commentReferrer comment)
       href = (\u -> u {uriFragment = "#" <> slide}) <$> referrer
-      text = maybe deck (takeFileName . uriPath) referrer <> "#" <> slide
+      -- text = maybe deck (takeFileName . uriPath) referrer <> "#" <> slide
+      text = deck <> "#" <> slide
    in toText $
         renderHtml $
           H.html $ do
