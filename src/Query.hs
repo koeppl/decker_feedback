@@ -32,7 +32,7 @@ $( deriveJSON
  )
 
 data CommentData = CommentData
-  { commentMarkdown :: Text,
+  { commentMarkdown :: Maybe Text,
     commentToken :: Maybe Text,
     commentDeck :: Text,
     commentSlide :: Text,

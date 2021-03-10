@@ -203,26 +203,27 @@ getOrCreatePerson token = do
 
 postOrUpdateComment :: Handler ()
 postOrUpdateComment = do
+  logI "Update or post comment: "
   cdata <- jsonData
   logI $ show cdata
-  -- If a commentId is given, update existing, else create new one
-  update <-
-    case Query.commentId cdata of
-      Just cId -> canDelete (commentToken cdata) cId
-      Nothing -> return False
-  if update
-    then updateComment cdata
-    else postComment cdata
+  case Query.commentId cdata of
+    Just cId -> do
+      canDel <- canDelete (commentToken cdata) cId
+      if canDel
+        then updateComment cdata
+        else status forbidden403
+    Nothing -> postComment cdata
 
 updateComment :: Query.CommentData -> Handler ()
 updateComment cdata = do
-  logI $ "Updating comment: " <> show (Query.commentId cdata)
+  let markdown = fromMaybe "" (Query.commentMarkdown cdata)
   runDb $
     Sqlite.update
       (fromJust $ Query.commentId cdata)
-      [ CommentMarkdown =. Query.commentMarkdown cdata,
-        CommentHtml =. compileMarkdown (Query.commentMarkdown cdata)
+      [ CommentMarkdown =. markdown,
+        CommentHtml =. compileMarkdown markdown
       ]
+  json $ Query.commentId cdata
 
 postComment :: Query.CommentData -> Handler ()
 postComment cdata = do
@@ -236,10 +237,11 @@ postComment cdata = do
         Nothing -> Just <$> runDb (Sqlite.insert (Person token))
     Nothing -> return Nothing
   let deck = Query.commentDeck cdata
+  let markdown = fromMaybe "" (Query.commentMarkdown cdata)
   let comment =
         Model.Comment
-          (Query.commentMarkdown cdata)
-          (compileMarkdown (Query.commentMarkdown cdata))
+          markdown
+          (compileMarkdown markdown)
           author
           referrer
           deck
@@ -248,7 +250,7 @@ postComment cdata = do
   key <- runDb $ Sqlite.insert comment
   notify comment
   logI $ "Creating comment: " <> show key
-  status ok200
+  json key
 
 canDelete :: Maybe Text -> Key Model.Comment -> Handler Bool
 canDelete token key =

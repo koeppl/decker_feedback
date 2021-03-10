@@ -11,7 +11,7 @@ readme:
 	pandoc --standalone --self-contained -M css:README.css -M 'title:Decker Engine' README.md -o static/index.html
 
 run-local-cors: build
-	DECKER_CORS_ORIGINS="http://0.0.0.0:8888,http://localhost:8081,http://localhost:8888" stack run -- decker-engine
+	DECKER_CORS_ORIGINS="http://127.0.0.1:5500,http://0.0.0.0:8888,http://localhost:8081,http://localhost:8888" stack run -- decker-engine
 
 run-local: build
 	stack run -- decker-engine

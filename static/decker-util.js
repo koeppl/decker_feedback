@@ -1,4 +1,4 @@
-export {buildApi};
+export { buildApi };
 
 function buildApi(base) {
   let cors = window.location.origin !== new URL(base).origin;
@@ -12,63 +12,62 @@ function buildApi(base) {
         method: "GET",
         mode: cors ? "cors" : "same-origin",
         credentials: cors ? "omit" : "include",
-        cache: "no-store"
-      }).then(response => response.json());
+        cache: "no-store",
+      }).then((response) => response.json());
     },
 
-    getLogin: async credentials => {
+    getLogin: async (credentials) => {
       return fetch(base + "/login", {
         method: "PUT",
         mode: cors ? "cors" : "same-origin",
         cache: "no-store",
-        body: JSON.stringify(credentials)
-      }).then(response => response.json());
+        body: JSON.stringify(credentials),
+      }).then((response) => response.json());
     },
 
     getComments: async (deck, slide, token) => {
-      let data = {deck: deck, slide: slide, token: token};
+      let data = { deck: deck, slide: slide, token: token };
       return fetch(base + "/comments", {
         /* Need to use put, because server does not accept data in
            request body of GET. */
         method: "PUT",
         mode: cors ? "cors" : "same-origin",
         cache: "no-store",
-        body: JSON.stringify(data)
-      }).then(response => response.json());
+        body: JSON.stringify(data),
+      }).then((response) => response.json());
     },
 
     submitComment: (deck, slide, token, markdown, id, answered) => {
-      if (!markdown) return;
       let data = {
         deck: deck,
         slide: slide,
         token: token,
         markdown: markdown,
         id: id,
-        answered: answered
+        answered: answered,
       };
       return fetch(base + "/comments", {
         method: "POST",
         mode: cors ? "cors" : "same-origin",
-        body: JSON.stringify(data)
-      });
+        body: JSON.stringify(data),
+      }).then((response) => response.json());
     },
 
     deleteComment: (key, token) => {
-      let data = {key: key, token: token};
+      let data = { key: key, token: token };
       return fetch(base + "/comments", {
         method: "DELETE",
         mode: cors ? "cors" : "same-origin",
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
     },
 
-    voteComment: async vote => {
+    voteComment: async (vote) => {
       return fetch(base + "/vote", {
         method: "PUT",
         mode: cors ? "cors" : "same-origin",
         cache: "no-store",
-        body: JSON.stringify(vote)
+        body: JSON.stringify(vote),
       });
     },
 
@@ -82,18 +81,17 @@ function buildApi(base) {
       return fetch(base + "/answers", {
         method: "POST",
         mode: cors ? "cors" : "same-origin",
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
     },
 
     deleteAnswer: (key, token) => {
-      let data = {key: key, token: token};
+      let data = { key: key, token: token };
       return fetch(base + "/answers", {
         method: "DELETE",
         mode: cors ? "cors" : "same-origin",
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
     },
-
   };
 }
