@@ -59,7 +59,6 @@ engine :: IO ()
 engine = do
   pool <- connectDB
   users <- loadUserDB
-  print users
   sessions <- newTVarIO $ fromList []
   notificationChannel <- atomically newTChan
   let config = Config users sessions notificationChannel pool
@@ -100,7 +99,7 @@ getToken = do
           admin <- adminUser (authUser authorization) url
           case admin of
             Just user -> do
-              logI $ "generating user token"
+              logI $ "generating admin token"
               mkAdminToken creds user >>= json
             Nothing -> do
               logI $ "generating user token"
@@ -229,6 +228,7 @@ postComment :: Query.CommentData -> Handler ()
 postComment cdata = do
   now <- liftIO getCurrentTime
   referrer <- fmap toStrict <$> header "Referer" -- [sic]
+  logI $ "Creating comment from: " <> show referrer
   author <- case commentToken cdata of
     Just token -> do
       key <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
@@ -243,7 +243,7 @@ postComment cdata = do
           markdown
           (compileMarkdown markdown)
           author
-          referrer
+          (Query.commentLocation cdata)
           deck
           (Query.commentSlide cdata)
           now
@@ -258,10 +258,14 @@ canDelete token key =
     Just token -> do
       author <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
       comment <- runDb $ Sqlite.get key
+      answers <- runDb $ Sqlite.count [AnswerComment ==. key]
       case comment of
         Just comment -> do
           admin <- isAdminUser (Just token) (Model.commentDeck comment)
-          return $ isJust author && Model.commentAuthor comment == author || isJust admin
+          return $
+            isJust author
+              && Model.commentAuthor comment == author
+              && answers == 0 || isJust admin
         Nothing -> return False
     Nothing -> return False
 

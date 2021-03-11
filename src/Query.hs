@@ -37,7 +37,7 @@ data CommentData = CommentData
     commentDeck :: Text,
     commentSlide :: Text,
     commentId :: Maybe (Key Model.Comment),
-    commentAnswered :: Maybe UTCTime
+    commentLocation :: Maybe Text
   }
   deriving (Show)
 

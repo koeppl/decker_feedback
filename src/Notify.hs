@@ -13,10 +13,8 @@ import Database.Persist.Sqlite as Sqlite
 import Engine
 import Model
 import Network.Mail.Mime
-import Network.URI
 import Relude
 import State
-import System.FilePath.Posix
 import Text.Blaze.Html
 import Text.Blaze.Html.Renderer.Pretty
 import qualified Text.Blaze.Html5 as H
@@ -54,6 +52,9 @@ notifyAdminsOfDeck config comment = do
       let to = Address Nothing (email admin)
       let text = renderCommentText comment
       let html = renderCommentHtml comment allComments
+      -- putStrLn "Mails:"
+      -- print text
+      -- print html
       mail <-
         simpleMail
           to
@@ -69,8 +70,7 @@ renderCommentText comment =
   let deck = commentDeck comment
       slide = commentSlide comment
       referrer = commentReferrer comment
-      url = parseURI . toString . (<> "#" <> slide) =<< referrer
-      link = maybe (deck <> "#" <> slide) show url
+      link = fromMaybe (deck <> "#" <> slide) referrer
    in "You have one new question on slide:\n\n"
         <> link
         <> "\n\n"
@@ -82,10 +82,8 @@ renderCommentHtml :: Comment -> [Comment] -> Text
 renderCommentHtml comment allComments =
   let deck = toString $ commentDeck comment
       slide = toString $ commentSlide comment
-      referrer = parseURI =<< (toString <$> commentReferrer comment)
-      href = (\u -> u {uriFragment = "#" <> slide}) <$> referrer
-      -- text = maybe deck (takeFileName . uriPath) referrer <> "#" <> slide
-      text = deck <> "#" <> slide
+      referrer = toString <$> commentReferrer comment
+      linkText = deck <> "#" <> slide
    in toText $
         renderHtml $
           H.html $ do
@@ -95,9 +93,9 @@ renderCommentHtml comment allComments =
             H.body $ do
               H.h1 ! A.style "font-size:1.6em;" $ "New Question"
               H.p "You have one new question on slide:"
-              case href of
-                Just href -> H.p $ H.a ! A.href (show href) $ H.code $ toHtml text
-                Nothing -> H.p $ H.a $ H.code $ toHtml text
+              case referrer of
+                Just href -> H.p $ H.a ! A.href (toValue href) $ H.code $ toHtml linkText
+                Nothing -> H.p $ H.code $ toHtml linkText
               H.p $ preEscapedToHtml $ commentHtml comment
 
 -- H.h2 "All questions in the deck:"
