@@ -35,7 +35,7 @@ install-service: install
 	sudo systemctl start decker-engine
 
 service-logs:
-	journalctl -u decker-engine.service
+	journalctl -u decker-engine.service -f
 
 common := --referer http://localhost:8081 --header "Content-Type: application/json" --header "Accept: application/json" 
 heise := 
