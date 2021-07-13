@@ -48,8 +48,8 @@ class Comment extends Component {
       return html`
         <div class="comment">
           <textarea rows="5" cols="40" onInput=${this.input}>
-${raw(comment.markdown)}
-</textarea
+            ${raw(comment.markdown)}
+          </textarea
           >
           <button type="button" onClick=${this.submit}>Update</button>
           ${!comment.brandNew
@@ -65,8 +65,8 @@ ${raw(comment.markdown)}
           </div>
           ${raw(comment.html)}
           ${canDelete
-            ? html` <button type="button" onClick=${this.edit}>Edit</button
-                ><button type="button" onClick=${this.delete}>Delete</button>`
+            ? html` <button type="button" onClick=${this.edit}>Edit</button>
+                <button type="button" onClick=${this.delete}>Delete</button>`
             : html``}
         </div>
       `;
