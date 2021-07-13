@@ -92,6 +92,9 @@ getToken = do
   authorization <- fmap toStrict <$> header "Authorization"
   case authorization of
     Just creds -> do
+      -- TODO do not use the referrer as it is now truncated by all browsers.
+      -- This only is problematic if running behind some authorization like
+      -- Beuth LDAP. Nobody does that, except me.
       referrer <- fmap toStrict <$> header "Referer" -- [sic]
       logI $ "getToken from: " <> show referrer
       case referrer of
@@ -227,8 +230,6 @@ updateComment cdata = do
 postComment :: Query.CommentData -> Handler ()
 postComment cdata = do
   now <- liftIO getCurrentTime
-  referrer <- fmap toStrict <$> header "Referer" -- [sic]
-  logI $ "Creating comment from: " <> show referrer
   author <- case commentToken cdata of
     Just token -> do
       key <- fmap entityKey <$> runDb (selectFirst [PersonToken ==. token] [])
@@ -287,7 +288,6 @@ deleteComment = do
 -- | Creates and returns an admin token for the provided credentials.
 loginAdmin :: Handler ()
 loginAdmin = do
-  -- deck <- fromJust . fmap toStrict <$> header "Referer"
   creds <- jsonData
   let deck = credDeck creds
   sessions <- asks adminSessions
