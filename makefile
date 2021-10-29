@@ -4,11 +4,14 @@ directory := $(PWD)
 pidfile := decker-engine.pid
 lockfile := decker-engine.lock
 
-build:
+build: 
 	stack build
 
+readme:
+	pandoc --standalone --self-contained -M css:README.css -M 'title:Decker Engine' README.md -o static/index.html
+
 run-local-cors: build
-	DECKER_CORS_ORIGINS="http://0.0.0.0:8888,http://localhost:8081,http://localhost:8888" stack run -- decker-engine
+	DECKER_CORS_ORIGINS="http://127.0.0.1:5500,http://0.0.0.0:8888,http://localhost:8081,http://localhost:8888" stack run -- decker-engine
 
 run-local: build
 	stack run -- decker-engine
@@ -23,8 +26,7 @@ open: build
 install-service: install
 	sudo systemctl stop decker-engine
 	sudo cp decker-engine.service /etc/systemd/system
-	sudo cp ~/.local/bin/decker-engine /usr/local/bin
-	sudo cp ~/.local/bin/decker-daemon /usr/local/bin
+	sudo cp ~/.local/bin/decker-engine-exe /usr/local/bin
 	sudo cp -r static/* /var/local/decker/static
 	sudo cp db/users.yaml /var/local/decker/db
 	sudo chown -R decker:decker /var/local/decker
@@ -33,7 +35,7 @@ install-service: install
 	sudo systemctl start decker-engine
 
 service-logs:
-	journalctl -u decker-engine.service
+	journalctl -u decker-engine.service -f
 
 common := --referer http://localhost:8081 --header "Content-Type: application/json" --header "Accept: application/json" 
 heise := 

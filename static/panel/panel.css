@@ -1,0 +1,83 @@
+body {
+  background-color: #eee;
+}
+
+p {
+  padding: 0;
+  margin: 0;
+}
+
+div#question-panel {
+  background-color: white;
+  margin: 2ex;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  padding: 1ex;
+}
+
+div.panel {
+  height: 100%;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+div.header {
+  background-color: #eef;
+  flex: 0 1 content;
+  padding: 1ex;
+}
+
+div.comments {
+  flex: 1 1;
+  overflow-y: scroll;
+  padding: 1ex;
+}
+
+div.footer {
+  background-color: #eef;
+  flex: 0 1 content;
+  padding: 1ex;
+}
+
+div.comment {
+  margin-top: 1ex;
+  padding: 1ex;
+  background-color: #fee;
+}
+
+div.comment textarea {
+  width: calc(100% - 2ex);
+  margin: 1ex;
+}
+
+div.comment p {
+  margin: 0;
+  padding: 0;
+}
+
+div.answer textarea {
+  width: calc(100% - 2ex);
+  margin: 1ex;
+}
+
+div.answer {
+  margin-top: 1ex;
+  padding: 1ex;
+  margin-left: 4ex;
+  background-color: #efe;
+}
+
+div.answer p {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+}

@@ -3,26 +3,23 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages:
-- completed:
-    subdir: commonmark
-    cabal-file:
-      size: 3278
-      sha256: fbff7a2ade0ce7d699964a87f765e503a3a9e22542c05f0f02ba7aad64e38af4
-    name: commonmark
-    version: 0.1.0.2
-    git: git@github.com:jgm/commonmark-hs.git
-    pantry-tree:
-      size: 1407
-      sha256: c1dea57a15785a8ab66da93c66a69f59f2c6abf537a67d71bd730755c89fa9d0
-    commit: f9132b7686de276454a5aab14df9cabed817f86e
-  original:
-    subdir: commonmark
-    git: git@github.com:jgm/commonmark-hs.git
-    commit: f9132b7686de276454a5aab14df9cabed817f86e
 snapshots:
-- completed:
-    size: 532177
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/20.yaml
+- original: lts-16.20
+  completed:
     sha256: 0e14ba5603f01e8496e8984fd84b545a012ca723f51a098c6c9d3694e404dc6d
-  original: lts-16.20
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/20.yaml
+    size: 532177
+packages:
+- original:
+    subdir: commonmark
+    git: https://github.com/jgm/commonmark-hs.git
+    commit: f9132b7686de276454a5aab14df9cabed817f86e
+  completed:
+    pantry-tree:
+      sha256: c1dea57a15785a8ab66da93c66a69f59f2c6abf537a67d71bd730755c89fa9d0
+      size: 1407
+    subdir: commonmark
+    version: 0.1.0.2
+    git: https://github.com/jgm/commonmark-hs.git
+    name: commonmark
+    commit: f9132b7686de276454a5aab14df9cabed817f86e

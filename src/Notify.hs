@@ -13,15 +13,14 @@ import Database.Persist.Sqlite as Sqlite
 import Engine
 import Model
 import Network.Mail.Mime
-import Network.URI
 import Relude
 import State
-import System.FilePath.Posix
 import Text.Blaze.Html
 import Text.Blaze.Html.Renderer.Pretty
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import Text.Groom
+
+-- import Text.Groom
 
 startNotifier :: Config -> IO ()
 startNotifier config = do
@@ -41,21 +40,21 @@ notify comment = do
 
 notifyAdminsOfDeck :: Config -> Model.Comment -> IO ()
 notifyAdminsOfDeck config comment = do
-  unless (isLocalDeck deck) $ do
-    let all = toList $ users $ userDB config
-    let admins = filter (sendEmailForDeck deck) all
-    allComments <- allCommentsForDeck config deck
-    mapM_ (notify allComments) admins
+  -- unless (isLocalDeck deck) $ do
+  let all = toList $ users $ userDB config
+  let admins = filter (sendEmailForDeck deck) all
+  allComments <- allCommentsForDeck config deck
+  mapM_ (notify allComments) admins
   where
     deck = commentDeck comment
-    slide = commentSlide comment
     notify allComments admin = do
-      let url = parseURI $ toString (deck <> "#" <> slide)
-      let link = maybe (deck <> "#" <> slide) show url
       let from = Address Nothing "engine@decker.tools"
       let to = Address Nothing (email admin)
-      let text = renderCommentText comment link
+      let text = renderCommentText comment
       let html = renderCommentHtml comment allComments
+      -- putStrLn "Mails:"
+      -- print text
+      -- print html
       mail <-
         simpleMail
           to
@@ -66,23 +65,25 @@ notifyAdminsOfDeck config comment = do
           []
       renderSendMail mail
 
-renderCommentText :: Comment -> Text -> Text
-renderCommentText comment link =
-  "You have one new question on slide:\n\n"
-    <> link
-    <> "\n\n"
-    <> show (commentCreated comment)
-    <> "\n\n"
-    <> commentMarkdown comment
+renderCommentText :: Comment -> Text
+renderCommentText comment =
+  let deck = commentDeck comment
+      slide = commentSlide comment
+      referrer = commentReferrer comment
+      link = fromMaybe (deck <> "#" <> slide) referrer
+   in "You have one new question on slide:\n\n"
+        <> link
+        <> "\n\n"
+        <> show (commentCreated comment)
+        <> "\n\n"
+        <> commentMarkdown comment
 
 renderCommentHtml :: Comment -> [Comment] -> Text
 renderCommentHtml comment allComments =
-  let slideUri = commentDeck comment <> "#" <> commentSlide comment
-      url = parseURI $ toString slideUri
-      text = case url of
-        Just url -> fromJust $ viaNonEmpty head . reverse $ splitPath $ uriPath url
-        Nothing -> toString slideUri
-      href :: String = maybe "" show url
+  let deck = toString $ commentDeck comment
+      slide = toString $ commentSlide comment
+      referrer = toString <$> commentReferrer comment
+      linkText = deck <> "#" <> slide
    in toText $
         renderHtml $
           H.html $ do
@@ -92,10 +93,13 @@ renderCommentHtml comment allComments =
             H.body $ do
               H.h1 ! A.style "font-size:1.6em;" $ "New Question"
               H.p "You have one new question on slide:"
-              H.p $ H.a ! A.href (toValue href) $ H.code $ toHtml text
+              case referrer of
+                Just href -> H.p $ H.a ! A.href (toValue href) $ H.code $ toHtml linkText
+                Nothing -> H.p $ H.code $ toHtml linkText
               H.p $ preEscapedToHtml $ commentHtml comment
-              -- H.h2 "All questions in the deck:"
-              -- H.ul $ toHtml $ map (H.li . toHtml . commentHtml) allComments
+
+-- H.h2 "All questions in the deck:"
+-- H.ul $ toHtml $ map (H.li . toHtml . commentHtml) allComments
 
 allCommentsForDeck :: Config -> Text -> IO [Model.Comment]
 allCommentsForDeck config deck = do

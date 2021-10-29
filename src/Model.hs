@@ -20,7 +20,9 @@ module Model where
 import Data.Time.Clock
 import Database.Persist.Sql
 import Database.Persist.TH
+import Network.URI
 import Relude
+import Uri ()
 
 share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
@@ -29,15 +31,21 @@ Person json
   token Text
   UniquePersonToken token
   deriving Show Eq
-Vote 
-  comment CommentId
-  voter PersonId
 Comment json
   markdown Text
   html Text
   author PersonId Maybe
+  referrer Text Maybe
   deck Text
   slide Text
   created UTCTime default=CURRENT_TIME
   deriving Show Eq
+Answer
+  comment CommentId
+  markdown Text Maybe
+  link URI Maybe
+  created UTCTime default=CURRENT_TIME
+Vote 
+  comment CommentId
+  voter PersonId
 |]

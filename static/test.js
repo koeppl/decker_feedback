@@ -1,6 +1,9 @@
-import { buildApi } from "./decker-util.js";
+import {buildApi} from "./decker-util.js";
 
-let util = buildApi(".");
+let location = window.location.toString();
+let base = location.substring(0, location.lastIndexOf("/"));
+let util = buildApi(base);
+window.Decker = util;
 
 window.addEventListener("load", async _ => {
   let deckid = document.getElementById("deckid");
@@ -37,7 +40,7 @@ window.addEventListener("load", async _ => {
         token: serverToken.authorized
       };
     } else {
-      return { deck: url.href, slide: slideid.value, token: token.value };
+      return {deck: url.href, slide: slideid.value, token: token.value};
     }
   };
 
@@ -70,22 +73,44 @@ window.addEventListener("load", async _ => {
   };
 
   let renderList = list => {
+    let context = getContext();
     while (container.firstChild) {
       container.removeChild(container.lastChild);
     }
     for (let comment of list) {
+      console.log(comment);
       let div = document.createElement("div");
       div.innerHTML = comment.html;
-      if (comment.delete) {
+      if (comment.author === context.token) {
         let del = document.createElement("button");
         del.textContent = "✖";
         del.addEventListener("click", _ => {
           let context = getContext();
           util
-            .deleteComment(comment.delete, context.token)
+            .deleteComment(comment.id, context.token)
             .then(updateComments);
         });
         div.appendChild(del);
+      }
+      if (comment.answers.length > 0) {
+        div.setAttribute("data-answered", 1);
+        div.addEventListener("click", () => {
+          console.log("Remove answers");
+          for (a of comment.answers) {
+            util.deleteAnswer(a.id, context.token)
+              .then(updateComments)
+              .catch(console.log);
+          }
+        });
+      } else {
+        div.removeAttribute("data-answered");
+        div.addEventListener("click", () => {
+          console.log("Add answer");
+          util
+            .postAnswer(comment.id, context.token)
+            .then(updateComments)
+            .catch(console.log);
+        });
       }
       container.appendChild(div);
     }

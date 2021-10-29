@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators #-}
@@ -6,12 +7,18 @@
 
 module Query where
 
+import Data.Aeson
 import Data.Aeson.TH
 import Data.Char
+import Data.Time
 import Database.Persist.Sqlite
+import GHC.Generics
 import qualified Model
+import Network.URI
 import Relude
+import Uri ()
 
+-- Admin login
 data Credentials = Credentials
   { credLogin :: Text,
     credPassword :: Text,
@@ -25,11 +32,12 @@ $( deriveJSON
  )
 
 data CommentData = CommentData
-  { commentMarkdown :: Text,
+  { commentMarkdown :: Maybe Text,
     commentToken :: Maybe Text,
     commentDeck :: Text,
     commentSlide :: Text,
-    commentId :: Maybe (Key Model.Comment)
+    commentId :: Maybe (Key Model.Comment),
+    commentLocation :: Maybe Text
   }
   deriving (Show)
 
@@ -50,11 +58,24 @@ $( deriveJSON
      ''Select
  )
 
+data EntityId = EntityId
+  { eidKey :: Int64,
+    eidToken :: Maybe Text
+  }
+  deriving (Generic)
+
+$( deriveJSON
+     defaultOptions
+       { fieldLabelModifier = drop 3 . map toLower
+       }
+     ''EntityId
+ )
+
 data CommentId = CommentId
   { idKey :: Key Model.Comment,
     idToken :: Maybe Text
   }
-  deriving (Show)
+  deriving (Generic, Show)
 
 $( deriveJSON
      defaultOptions
@@ -74,4 +95,19 @@ $( deriveJSON
        { fieldLabelModifier = drop 4 . map toLower
        }
      ''Vote
+ )
+
+data Answer = Answer
+  { answerComment :: Key Model.Comment,
+    answerMarkdown :: Maybe Text,
+    answerLink :: Maybe URI,
+    answerToken :: Text
+  }
+  deriving (Show)
+
+$( deriveJSON
+     defaultOptions
+       { fieldLabelModifier = drop 6 . map toLower
+       }
+     ''Answer
  )

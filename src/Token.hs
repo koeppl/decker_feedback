@@ -35,7 +35,11 @@ calcToken authorization =
       Just credentials -> return $ Token rnd (Just $ hash9 credentials) Nothing
       Nothing -> return $ Token rnd Nothing Nothing
 
-data Token = Token {tokenRandom :: Text, tokenAuthorized :: Maybe Text, tokenAdmin :: Maybe Text}
+data Token = Token
+  { tokenRandom :: Text,
+    tokenAuthorized :: Maybe Text,
+    tokenAdmin :: Maybe Text
+  }
   deriving (Show)
 
 $( deriveJSON

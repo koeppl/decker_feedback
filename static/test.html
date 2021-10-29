@@ -1,66 +1,75 @@
 <html>
-  <head>
+
+<head>
     <title>Q API Tester</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="water.css" type="text/css" charset="utf-8" />
     <style type="text/css" media="screen">
-      div#comment-list-1 {
-        max-height: 20em;
-        overflow: hidden;
-        overflow-y: scroll;
-      }
-      div#comment-list-1 div {
-        color: var(--form-text);
-        background-color: var(--background);
+        div#comment-list-1 {
+            max-height: 20em;
+            overflow: hidden;
+            overflow-y: scroll;
+        }
 
-        margin-right: 6px;
-        margin-bottom: 6px;
-        padding: 10px;
+        div#comment-list-1 div {
+            color: var(--form-text);
+            background-color: var(--background);
 
-        border: none;
-        border-radius: 6px;
-        outline: none;
-      }
-      div#comment-list-1 div button {
-        color: white;
-        background-color: #a00;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            padding: 10px;
 
-        margin: 0;
-        padding: 2px 4px;
+            border: none;
+            border-radius: 6px;
+            outline: none;
+        }
 
-        border: none;
-        border-radius: 3px;
-        outline: none;
+        div#comment-list-1 div button {
+            color: white;
+            background-color: #a00;
 
-        float: right;
-      }
-      i.example {
-        float: right;
-        color: var(--background);
-      }
+            margin: 0;
+            padding: 2px 4px;
+
+            border: none;
+            border-radius: 3px;
+            outline: none;
+
+            float: right;
+        }
+
+        i.example {
+            float: right;
+            color: var(--background);
+        }
+
+        div#comment-list-1 div[data-answered] {
+            background-color: #fee
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <header>
-      <h1>Q API Tester</h1>
+        <h1>Q API Tester</h1>
     </header>
 
     <p>
-      Test 1,2,3. This page tests the deck facing API of the Decker Engine.
+        Test 1,2,3. This page tests the deck facing API of the Decker Engine.
     </p>
 
     <h2>Context</h2>
 
     <p>
-      Comments can be selected by <i>deck ID</i> and <i>slide ID</i>. During
-      normal operation both identifiers will be determined from the deck source
-      and should be calculated such that the tuple (<i>deck ID</i>,
-      <i>slide ID</i>) uniquely identifies a slide (For a suitable definition of
-      <i>uniquely</i>).
+        Comments can be selected by <i>deck ID</i> and <i>slide ID</i>. During
+        normal operation both identifiers will be determined from the deck source
+        and should be calculated such that the tuple (<i>deck ID</i>,
+        <i>slide ID</i>) uniquely identifies a slide (For a suitable definition of
+        <i>uniquely</i>).
     </p>
     <p>
-      All matching questions are displayed, regardless of author. Questions that
-      match the current author are rendered with a delete button.
+        All matching questions are displayed, regardless of author. Questions that
+        match the current author are rendered with a delete button.
     </p>
     <p>Inputs are not yet validated aggressively. Tread lightly.</p>
 
@@ -77,8 +86,8 @@
     <h2>Qs on slide</h2>
 
     <p>
-      Questions that match the current combination of <i>deck ID</i> and
-      <i>slide ID</i>.
+        Questions that match the current combination of <i>deck ID</i> and
+        <i>slide ID</i>.
     </p>
 
     <div id="comment-list-1"></div>
@@ -86,8 +95,8 @@
     <h2>Add Q</h2>
 
     <p>
-      Add a question to the selected slide. If the author field is empty the
-      question is added anonymously.
+        Add a question to the selected slide. If the author field is empty the
+        question is added anonymously.
     </p>
 
     <label for="add-comment-1">What the fuck?</label>
@@ -95,5 +104,6 @@
     <button id="submit-button">Submit (⇧⏎)</button>
 
     <script src="./test.js" type="module" crossorigin></script>
-  </body>
+</body>
+
 </html>
