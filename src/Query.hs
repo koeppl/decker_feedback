@@ -10,7 +10,6 @@ module Query where
 import Data.Aeson
 import Data.Aeson.TH
 import Data.Char
-import Data.Time
 import Database.Persist.Sqlite
 import GHC.Generics
 import qualified Model

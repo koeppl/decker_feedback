@@ -102,16 +102,16 @@ getToken = do
           admin <- adminUser (authUser authorization) url
           case admin of
             Just user -> do
-              logI $ "generating admin token"
+              logI "generating admin token"
               mkAdminToken creds user >>= json
             Nothing -> do
-              logI $ "generating user token"
+              logI "generating user token"
               mkUserToken creds >>= json
         Nothing -> do
-          logI $ "generating anonymous token"
+          logI "generating anonymous token"
           mkRandomToken >>= json
     Nothing -> do
-      logI $ "generating anonymous token"
+      logI "generating anonymous token"
       mkRandomToken >>= json
 
 type CommentKey = Model.Key Model.Comment
