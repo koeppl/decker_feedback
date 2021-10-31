@@ -34,9 +34,11 @@ import Relude
 import State
 import View
 import Web.Scotty.Trans as S
+import System.Directory (createDirectoryIfMissing)
 
 connectDB :: IO ConnectionPool
 connectDB = runStdoutLoggingT $ do
+  
   pool <- createSqlitePool "db/engine.sqlite3" 10
   runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=OFF" []) pool
   runSqlPool (runMigration migrateAll) pool
@@ -57,6 +59,8 @@ runDb req = do
 
 engine :: IO ()
 engine = do
+  createDirectoryIfMissing True "db"
+  createDirectoryIfMissing True "log"
   pool <- connectDB
   users <- loadUserDB
   sessions <- newTVarIO $ fromList []
@@ -68,7 +72,7 @@ engine = do
 
 runAction :: Config -> EngineM Response -> IO Response
 runAction config action =
-  runStdoutLoggingT (runReaderT (runEngineM action) config)
+  runFileLoggingT "log/engine.log" (runReaderT (runEngineM action) config)
 
 app :: Middleware -> ScottyT Error EngineM ()
 app cors = do
