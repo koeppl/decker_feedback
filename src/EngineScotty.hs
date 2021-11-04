@@ -74,8 +74,8 @@ engine = do
 -- | Installs a threaded log writer and runs the action in the engine monad.
 runAction :: Config -> EngineM Response -> IO Response
 runAction config action = do
-  logChan <- newChan
-  logWriter logChan
+  -- logChan <- newChan
+  -- logWriter logChan
   -- runChanLoggingT logChan (filterLogger loggingFilter (runReaderT (runEngineM action) config))
   -- runFileLoggingT "log/engine.log" (filterLogger loggingFilter (runReaderT (runEngineM action) config))
   runStdoutLoggingT (filterLogger loggingFilter (runReaderT (runEngineM action) config))
@@ -233,23 +233,28 @@ postOrUpdateComment = do
   cdata <- jsonData
   logI $ show cdata
   case Query.commentId cdata of
-    Just cId -> do
-      canDel <- canDelete (commentToken cdata) cId
-      if canDel
-        then updateComment cdata
-        else status forbidden403
+    Just _ -> updateComment cdata
     Nothing -> postComment cdata
 
 updateComment :: Query.CommentData -> Handler ()
 updateComment cdata = do
   let markdown = fromMaybe "" (Query.commentMarkdown cdata)
-  runDb $
-    Sqlite.update
-      (fromJust $ Query.commentId cdata)
-      [ CommentMarkdown =. markdown,
-        CommentHtml =. compileMarkdown markdown
-      ]
-  json $ Query.commentId cdata
+  let id = fromJust $ Query.commentId cdata
+  let token = Query.commentToken cdata
+  let compiled = compileMarkdown markdown
+  canDel <- canDelete token id
+  if canDel
+    then do
+      runDb $ Sqlite.update id [CommentMarkdown =. markdown, CommentHtml =. compiled]
+      logI $ "Updating comment: " <> show id
+      json id
+    else do
+      logE $ "Cannot update comment: "
+      logE $ show cdata
+      admin <- isAdminUser token (Query.commentDeck cdata)
+      logE $ "Admin: " <> show admin
+
+      status forbidden403
 
 postComment :: Query.CommentData -> Handler ()
 postComment cdata = do
