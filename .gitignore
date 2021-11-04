@@ -2,6 +2,7 @@
 /.stack-work/
 /db/engine.sqlite3
 /db/engine.db
+/log/
 .decker
 public
 *-shm
