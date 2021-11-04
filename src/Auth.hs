@@ -54,7 +54,7 @@ localDecks = ["http://localhost", "http://0.0.0.0"]
 isLocalDeck :: Text -> Bool
 isLocalDeck = hasAnyPrefix localDecks
 
--- Checks if user is admin for the deck. All users are admin for local test decks.
+-- Checks if user is admin for the deck. All authenticated users are admin for local test decks.
 isAdminForDeck :: Text -> User -> Maybe User
 isAdminForDeck deck user =
   if hasAnyPrefix (decks user <> localDecks) deck

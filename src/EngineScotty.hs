@@ -13,6 +13,8 @@ import Commonmark
 -- import Network.Wai.Middleware.Routed
 
 import Conduit (MonadUnliftIO)
+import Control.Concurrent (forkIO)
+import Control.Concurrent.Chan (Chan, newChan)
 import Control.Concurrent.STM (newTChan)
 import Control.Monad.Logger
 import Cors
@@ -32,13 +34,12 @@ import Notify
 import Query
 import Relude
 import State
+import System.Directory (createDirectoryIfMissing)
 import View
 import Web.Scotty.Trans as S
-import System.Directory (createDirectoryIfMissing)
 
 connectDB :: IO ConnectionPool
 connectDB = runStdoutLoggingT $ do
-  
   pool <- createSqlitePool "db/engine.sqlite3" 10
   runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=OFF" []) pool
   runSqlPool (runMigration migrateAll) pool
@@ -70,13 +71,32 @@ engine = do
   startNotifier config
   scottyT 8081 (runAction config) (app cors)
 
+-- | Installs a threaded log writer and runs the action in the engine monad.
 runAction :: Config -> EngineM Response -> IO Response
-runAction config action =
-  runFileLoggingT "log/engine.log" (runReaderT (runEngineM action) config)
+runAction config action = do
+  logChan <- newChan
+  logWriter logChan
+  runChanLoggingT logChan (filterLogger loggingFilter (runReaderT (runEngineM action) config))
+
+-- runFileLoggingT "log/engine.log" (filterLogger loggingFilter (runReaderT (runEngineM action) config))
+
+logWriter :: Chan LogLine -> IO ()
+logWriter chan = do
+  _ <- forkIO $ runFileLoggingT "log/engine.log" $ unChanLoggingT chan
+  return ()
+
+loggingFilter :: LogSource -> LogLevel -> Bool
+loggingFilter source level =
+  level
+    `elem` [ LevelDebug,
+             LevelInfo,
+             LevelWarn,
+             LevelError
+           ]
 
 app :: Middleware -> ScottyT Error EngineM ()
 app cors = do
-  middleware logStdoutDev
+  -- middleware logStdoutDev
   middleware cors
   middleware $ staticPolicy (addBase "static")
   S.get "/token" getToken
@@ -300,8 +320,7 @@ loginAdmin = do
   case admin of
     Nothing -> logE $ "Authentication failed for: " <> credLogin creds
     Just admin -> do
-      let forDeck = isAdminForDeck deck admin
-      case forDeck of
+      case isAdminForDeck deck admin of
         Nothing -> do
           logE $
             "Admin: "
@@ -313,6 +332,7 @@ loginAdmin = do
           status forbidden403
         Just user -> do
           logI $ "Login succeeded for: " <> show (credLogin creds) <> " on: " <> show deck
+          logI $ "Because: " <> show (decks admin)
           token <- liftIO $ makeSessionToken' sessions user
           json (fromList [("admin", token)] :: Map Text Text)
 
@@ -393,7 +413,15 @@ postAnswer = do
         Nothing -> status forbidden403
     Nothing -> status notFound404
 
+logI :: Text -> ActionT Error EngineM ()
 logI = lift . logInfoN
 
+logD :: Text -> ActionT Error EngineM ()
+logD = lift . logDebugN
+
+logW :: Text -> ActionT Error EngineM ()
+logW = lift . logWarnN
+
 -- logW = lift . logWarnN
+logE :: Text -> ActionT Error EngineM ()
 logE = lift . logErrorN
