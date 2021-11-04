@@ -61,7 +61,7 @@ runDb req = do
 engine :: IO ()
 engine = do
   createDirectoryIfMissing True "db"
-  createDirectoryIfMissing True "log"
+  -- createDirectoryIfMissing True "log"
   pool <- connectDB
   users <- loadUserDB
   sessions <- newTVarIO $ fromList []
@@ -76,9 +76,9 @@ runAction :: Config -> EngineM Response -> IO Response
 runAction config action = do
   logChan <- newChan
   logWriter logChan
-  runChanLoggingT logChan (filterLogger loggingFilter (runReaderT (runEngineM action) config))
-
--- runFileLoggingT "log/engine.log" (filterLogger loggingFilter (runReaderT (runEngineM action) config))
+  -- runChanLoggingT logChan (filterLogger loggingFilter (runReaderT (runEngineM action) config))
+  -- runFileLoggingT "log/engine.log" (filterLogger loggingFilter (runReaderT (runEngineM action) config))
+  runStdoutLoggingT (filterLogger loggingFilter (runReaderT (runEngineM action) config))
 
 logWriter :: Chan LogLine -> IO ()
 logWriter chan = do
@@ -96,7 +96,7 @@ loggingFilter source level =
 
 app :: Middleware -> ScottyT Error EngineM ()
 app cors = do
-  -- middleware logStdoutDev
+  middleware logStdoutDev
   middleware cors
   middleware $ staticPolicy (addBase "static")
   S.get "/token" getToken

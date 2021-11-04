@@ -9,6 +9,9 @@ User=decker
 Group=decker
 Restart=always
 RestartSec=1s
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=decker-engine
 
 [Install]
 WantedBy=multi-user.target
