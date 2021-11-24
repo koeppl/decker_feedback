@@ -7,11 +7,22 @@ module Notify where
 
 import Auth
 import Control.Concurrent
-import Control.Concurrent.STM.TChan
+import Control.Concurrent.STM.TChan (readTChan, writeTChan)
+import Control.Exception (handle)
 import Data.Maybe
 import Database.Persist.Sqlite as Sqlite
 import Engine
 import Model
+  ( Comment
+      ( commentCreated,
+        commentDeck,
+        commentHtml,
+        commentMarkdown,
+        commentReferrer,
+        commentSlide
+      ),
+    EntityField (CommentCreated, CommentDeck),
+  )
 import Network.Mail.Mime
 import Relude
 import State
@@ -31,7 +42,9 @@ notificationLoop :: Config -> IO ()
 notificationLoop config = do
   let chan = notificationChannel config
   comment <- atomically $ readTChan chan
-  notifyAdminsOfDeck config comment
+  handle
+    (\(SomeException e) -> putStrLn $ "ERROR: " <> show e)
+    (notifyAdminsOfDeck config comment)
 
 notify :: Model.Comment -> Handler ()
 notify comment = do
@@ -48,7 +61,7 @@ notifyAdminsOfDeck config comment = do
   where
     deck = commentDeck comment
     notify allComments admin = do
-      let from = Address Nothing "engine@decker.tools"
+      let from = Address (Just "Decker Feedback") "tramberend-srv@bht-berlin.de"
       let to = Address Nothing (email admin)
       let text = renderCommentText comment
       let html = renderCommentHtml comment allComments
@@ -63,7 +76,8 @@ notifyAdminsOfDeck config comment = do
           (toLazy text)
           (toLazy html)
           []
-      renderSendMail mail
+      putStrLn $ toString $ "Sending mail to: " <> email admin
+      renderSendMailCustom "/usr/local/bin/msmtp" ["-t"] mail
 
 renderCommentText :: Comment -> Text
 renderCommentText comment =
