@@ -77,7 +77,7 @@ notifyAdminsOfDeck config comment = do
           (toLazy html)
           []
       putStrLn $ toString $ "Sending mail to: " <> email admin
-      renderSendMailCustom "/usr/local/bin/msmtp" ["-t"] mail
+      renderSendMail mail
 
 renderCommentText :: Comment -> Text
 renderCommentText comment =
