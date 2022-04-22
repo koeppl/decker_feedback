@@ -92,7 +92,7 @@ checkProtected :: Request -> IO Bool
 checkProtected request = do
   return $ pathInfo request == ["login"]
 
--- | Decodes the Authorization header value and retuns the authorized user
+-- | Decodes the Authorization header value and returns the authorized user
 authUser :: Maybe Text -> Maybe Text
 authUser header = do
   value <- header
