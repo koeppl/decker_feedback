@@ -7,7 +7,7 @@
 
 module Query where
 
-import Data.Aeson
+import Data.Aeson hiding (Key)
 import Data.Aeson.TH
 import Data.Char
 import Database.Persist.Sqlite

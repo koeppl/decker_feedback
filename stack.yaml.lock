@@ -3,23 +3,17 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-snapshots:
-- original: lts-16.20
-  completed:
-    sha256: 0e14ba5603f01e8496e8984fd84b545a012ca723f51a098c6c9d3694e404dc6d
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/20.yaml
-    size: 532177
 packages:
-- original:
-    subdir: commonmark
-    git: https://github.com/jgm/commonmark-hs.git
-    commit: f9132b7686de276454a5aab14df9cabed817f86e
-  completed:
+- completed:
+    hackage: servant-js-0.9.4.2@sha256:ecde63703894c143ccf36b5863a4fba672c7f5e28e1fb0291c8062db727e16c5,3526
     pantry-tree:
-      sha256: c1dea57a15785a8ab66da93c66a69f59f2c6abf537a67d71bd730755c89fa9d0
-      size: 1407
-    subdir: commonmark
-    version: 0.1.0.2
-    git: https://github.com/jgm/commonmark-hs.git
-    name: commonmark
-    commit: f9132b7686de276454a5aab14df9cabed817f86e
+      sha256: ddc874a106161ec1a2f41df321629b22dbf0fefad6c84f2e68aa4bddbd83a3cf
+      size: 961
+  original:
+    hackage: servant-js-0.9.4.2@sha256:ecde63703894c143ccf36b5863a4fba672c7f5e28e1fb0291c8062db727e16c5,3526
+snapshots:
+- completed:
+    sha256: 14ca51a9a597c32dd7804c10d079feea3d0ae40c5fbbb346cbd67b3ae49f6d01
+    size: 649598
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/17.yaml
+  original: lts-20.17

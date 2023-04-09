@@ -1,10 +1,11 @@
-resolver: lts-16.20
+resolver: lts-20.17
 
 packages:
   - .
 
 extra-deps: 
-  - git: https://github.com/jgm/commonmark-hs.git
-    commit: f9132b7686de276454a5aab14df9cabed817f86e
-    subdirs:
-      - commonmark
+  - servant-js-0.9.4.2@sha256:ecde63703894c143ccf36b5863a4fba672c7f5e28e1fb0291c8062db727e16c5,3526
+  # - git: https://github.com/jgm/commonmark-hs.git
+  #   commit: f9132b7686de276454a5aab14df9cabed817f86e
+  #   subdirs:
+  #     - commonmark

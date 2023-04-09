@@ -8,7 +8,7 @@ import Data.Time
 import Data.Yaml
 import Relude
 import State
-import System.Environment
+import System.Environment (getProgName)
 import Token
 import Auth
 

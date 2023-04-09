@@ -7,7 +7,6 @@ import qualified Data.Text as Text
 import Network.Wai
 import Network.Wai.Middleware.Cors
 import Relude hiding (group)
-import System.Environment
 
 -- | Transform a comma separated string of origin URLs into a list for the
 -- cors middleware.

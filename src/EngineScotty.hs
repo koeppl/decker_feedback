@@ -41,18 +41,18 @@ import Web.Scotty.Trans as S
 connectDB :: IO ConnectionPool
 connectDB = runStdoutLoggingT $ do
   pool <- createSqlitePool "db/engine.sqlite3" 10
-  runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=OFF" []) pool
+  -- runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=OFF" []) pool
   runSqlPool (runMigration migrateAll) pool
-  runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=ON" []) pool
+  -- runSqlPoolNoTransaction (rawExecute "PRAGMA foreign_keys=ON" []) pool
   return pool
 
-runSqlPoolNoTransaction ::
-  forall backend m a.
-  (MonadUnliftIO m, BackendCompatible SqlBackend backend) =>
-  ReaderT backend m a ->
-  Pool backend ->
-  m a
-runSqlPoolNoTransaction r pconn = with (unsafeAcquireSqlConnFromPool pconn) $ runReaderT r
+-- runSqlPoolNoTransaction ::
+--   forall backend m a.
+--   (MonadUnliftIO m, BackendCompatible SqlBackend backend) =>
+--   ReaderT backend m a ->
+--   Pool backend ->
+--   m a
+-- runSqlPoolNoTransaction r pconn = with (unsafeAcquireSqlConnFromPool pconn) $ runReaderT r
 
 runDb req = do
   pool <- asks dbPool
@@ -113,27 +113,15 @@ app cors = do
 -- unauthorized.
 getToken :: Handler ()
 getToken = do
-  authorization <- fmap toStrict <$> header "Authorization"
-  case authorization of
-    Just creds -> do
+  tokenUser <- fmap toStrict <$> header "X-Token-User-Name" -- caddy security JWT sets this
+  logI $ "X-Token-User-Name: " <> show (fromMaybe "" tokenUser)
+  case tokenUser of
+    Just name -> do
       -- TODO do not use the referrer as it is now truncated by all browsers.
       -- This only is problematic if running behind some authorization like
       -- Beuth LDAP. Nobody does that, except me.
-      referrer <- fmap toStrict <$> header "Referer" -- [sic]
-      logI $ "getToken from: " <> show referrer
-      case referrer of
-        Just url -> do
-          admin <- adminUser (authUser authorization) url
-          case admin of
-            Just user -> do
-              logI "generating admin token"
-              mkAdminToken creds user >>= json
-            Nothing -> do
-              logI "generating user token"
-              mkUserToken creds >>= json
-        Nothing -> do
-          logI "generating anonymous token"
-          mkRandomToken >>= json
+      logI "generating user token"
+      mkUserToken name >>= json
     Nothing -> do
       logI "generating anonymous token"
       mkRandomToken >>= json
