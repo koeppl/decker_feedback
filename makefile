@@ -24,12 +24,15 @@ open: build
 	stack run -- decker-engine
 
 install-service: install
-	sudo systemctl stop decker-engine
 	sudo cp decker-engine.service /etc/systemd/system
 	sudo cp ~/.local/bin/decker-engine-exe /usr/local/bin
+	sudo mkdir -p /var/tmp/decker
+	sudo mkdir -p /var/local/decker/static
+	sudo mkdir -p /var/local/decker/db
 	sudo cp -r static/* /var/local/decker/static
 	sudo cp db/users.yaml /var/local/decker/db
-	sudo chown -R decker:decker /var/local/decker
+	sudo chown -R daemon:daemon /var/tmp/decker /var/local/decker
+	sudo systemctl stop decker-engine
 	sudo systemctl daemon-reload
 	sudo systemctl enable decker-engine
 	sudo systemctl start decker-engine
