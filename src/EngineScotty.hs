@@ -12,15 +12,12 @@ import Commonmark
 
 -- import Network.Wai.Middleware.Routed
 
-import Conduit (MonadUnliftIO)
 import Control.Concurrent (forkIO)
-import Control.Concurrent.Chan (Chan, newChan)
+import Control.Concurrent.Chan (Chan)
 import Control.Concurrent.STM (newTChan)
 import Control.Monad.Logger
 import Cors
-import Data.Acquire (with)
 import Data.Maybe
-import Data.Pool (Pool)
 import qualified Data.Text.Internal.Builder as Text
 import Data.Time
 import Database.Persist.Sqlite as Sqlite
@@ -114,11 +111,18 @@ app cors = do
 getToken :: Handler ()
 getToken = do
   tokenUser <- fmap toStrict <$> header "X-Token-Subject" -- caddy security JWT sets this
-  logI $ "X-Token-Subject: " <> show (fromMaybe "" tokenUser)
+  logI $ "X-Token-Subject: " <> show tokenUser
   case tokenUser of
-    Just name -> do
-      logI "generating user token"
-      mkUserToken name >>= json
+    Just subject -> do
+      deckid :: Text <- param "deckid" `rescue` const (return "")
+      admin <- adminUser (Just subject) deckid
+      case admin of
+        Just user -> do
+          logI "generating admin token"
+          mkAdminToken subject user >>= json
+        Nothing -> do
+          logI "generating user token"
+          mkUserToken subject >>= json
     Nothing -> do
       logI "generating anonymous token"
       mkRandomToken >>= json
