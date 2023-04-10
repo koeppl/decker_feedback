@@ -113,13 +113,10 @@ app cors = do
 -- unauthorized.
 getToken :: Handler ()
 getToken = do
-  tokenUser <- fmap toStrict <$> header "X-Token-User-Name" -- caddy security JWT sets this
-  logI $ "X-Token-User-Name: " <> show (fromMaybe "" tokenUser)
+  tokenUser <- fmap toStrict <$> header "X-Token-Subject" -- caddy security JWT sets this
+  logI $ "X-Token-Subject: " <> show (fromMaybe "" tokenUser)
   case tokenUser of
     Just name -> do
-      -- TODO do not use the referrer as it is now truncated by all browsers.
-      -- This only is problematic if running behind some authorization like
-      -- Beuth LDAP. Nobody does that, except me.
       logI "generating user token"
       mkUserToken name >>= json
     Nothing -> do
