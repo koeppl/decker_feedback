@@ -12,4 +12,4 @@ COPY static /bin/feedback/static
 COPY db /bin/feedback/db
 RUN apk add gmp 
 #gcompat
-CMD ["cd /bin/feedback && /bin/feedback/feedback"]
+CMD ["cd /bin/feedback && DECKER_CORS_ORIGINS='*' /bin/feedback/feedback"]
